@@ -11,13 +11,13 @@ class LoginScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);
 
-    ref.listen<AsyncValue<dynamic>>(authControllerProvider, (previous, next) {
+  ref.listen<AsyncValue<dynamic>>(authControllerProvider, (previous, next) {
       if (next.hasError && !next.isLoading) {
         final error = next.error;
-        final message = error is ApiException ? error.message : 'No se pudo iniciar sesión';
+        final message = error is ApiException ? error.message : error.toString();
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(message)));
+          ..showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 8)));
       }
     });
 
