@@ -1,0 +1,107 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../shared/widgets/async_value_widget.dart';
+import '../../auth/presentation/auth_controller.dart';
+import '../domain/group_membership.dart';
+import 'groups_controller.dart';
+import 'widgets/group_list_tile.dart';
+
+class GroupsListScreen extends ConsumerWidget {
+  const GroupsListScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final groupsAsync = ref.watch(groupsControllerProvider);
+    final user = ref.watch(authControllerProvider).valueOrNull;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mis grupos'),
+        actions: [
+          IconButton(
+            tooltip: 'Mi perfil',
+            icon: const Icon(Icons.person_outline),
+            onPressed: () => context.push('/profile'),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(groupsControllerProvider.notifier).refresh(),
+        child: AsyncValueWidget<List<GroupMembership>>(
+          value: groupsAsync,
+          onRetry: () => ref.read(groupsControllerProvider.notifier).refresh(),
+          data: (memberships) {
+            if (memberships.isEmpty) {
+              return ListView(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 120),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.groups_outlined,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          user != null ? '¡Hola, ${user.name}!' : '¡Hola!',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        const Text('Todavía no sos parte de ningún grupo.'),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            return ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: memberships.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (context, index) => GroupListTile(membership: memberships[index]),
+            );
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showCreateOrJoinSheet(context),
+        icon: const Icon(Icons.add),
+        label: const Text('Grupo'),
+      ),
+    );
+  }
+
+  void _showCreateOrJoinSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.add_circle_outline),
+              title: const Text('Crear un grupo nuevo'),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                context.push('/groups/create');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.group_add_outlined),
+              title: const Text('Unirme con un código'),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                context.push('/groups/join');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
