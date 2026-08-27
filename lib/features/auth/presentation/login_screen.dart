@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exception.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/pixel_soccer_ball.dart';
 import 'auth_controller.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -11,7 +13,7 @@ class LoginScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);
 
-  ref.listen<AsyncValue<dynamic>>(authControllerProvider, (previous, next) {
+    ref.listen<AsyncValue<dynamic>>(authControllerProvider, (previous, next) {
       if (next.hasError && !next.isLoading) {
         final error = next.error;
         final message = error is ApiException ? error.message : error.toString();
@@ -22,8 +24,10 @@ class LoginScreen extends ConsumerWidget {
     });
 
     final isLoading = authState.isLoading;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
+      backgroundColor: AppColors.navyDeep,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -31,18 +35,26 @@ class LoginScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.sports_soccer,
-                  size: 96,
-                  color: Theme.of(context).colorScheme.primary,
+                const PixelSoccerBall(
+                  size: 120,
+                  baseColor: AppColors.cream,
+                  patternColor: AppColors.navy,
                 ),
-                const SizedBox(height: 16),
-                Text('F5 App', style: Theme.of(context).textTheme.headlineMedium),
+                const SizedBox(height: 24),
+                Text(
+                  'F5',
+                  style: textTheme.headlineLarge?.copyWith(
+                    color: AppColors.gold,
+                    fontSize: 64,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Cargá tus partidos, seguí tu ELO y armá equipos parejos.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: AppColors.cream.withValues(alpha: 0.8),
+                  ),
                 ),
                 const SizedBox(height: 40),
                 SizedBox(
@@ -58,7 +70,7 @@ class LoginScreen extends ConsumerWidget {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.login),
-                    label: const Text('Continuar con Google'),
+                    label: const Text('CONTINUAR CON GOOGLE'),
                   ),
                 ),
               ],

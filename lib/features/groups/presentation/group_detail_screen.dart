@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../shared/utils/whatsapp_share.dart';
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -45,56 +46,35 @@ class GroupDetailScreen extends ConsumerWidget {
           children: [
             if (inviteCode != null) _InviteCodeCard(groupName: title, inviteCode: inviteCode),
             const SizedBox(height: 16),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.sports_soccer_outlined),
-                title: const Text('Jugadores'),
-                subtitle: const Text('Ver el pool y su ELO'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push(
-                  '/groups/$groupId/players',
-                  extra: isCurrentUserAdmin,
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.1,
+              children: [
+                _ActionTile(
+                  icon: Icons.sports_soccer_outlined,
+                  label: 'JUGADORES',
+                  onTap: () => context.push('/groups/$groupId/players', extra: isCurrentUserAdmin),
                 ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.event_note_outlined),
-                title: const Text('Partidos'),
-                subtitle: const Text('Historial y carga de partidos'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push(
-                  '/groups/$groupId/matches',
-                  extra: isCurrentUserAdmin,
+                _ActionTile(
+                  icon: Icons.event_note_outlined,
+                  label: 'PARTIDOS',
+                  onTap: () => context.push('/groups/$groupId/matches', extra: isCurrentUserAdmin),
                 ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.shuffle),
-                title: const Text('Armar equipos'),
-                subtitle: const Text('Generar equipos parejos según ELO'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push(
-                  '/groups/$groupId/team-generator',
-                  extra: isCurrentUserAdmin,
+                _ActionTile(
+                  icon: Icons.shuffle,
+                  label: 'ARMAR\nEQUIPOS',
+                  onTap: () => context.push('/groups/$groupId/team-generator', extra: isCurrentUserAdmin),
                 ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.tune),
-                title: const Text('Configuración de ELO'),
-                subtitle: const Text('Cómo se calcula el ELO en este grupo'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push(
-                  '/groups/$groupId/elo-config',
-                  extra: isCurrentUserAdmin,
+                _ActionTile(
+                  icon: Icons.tune,
+                  label: 'CONFIG.\nELO',
+                  onTap: () => context.push('/groups/$groupId/elo-config', extra: isCurrentUserAdmin),
                 ),
-              ),
+              ],
             ),
             const SizedBox(height: 24),
             Text('Miembros', style: Theme.of(context).textTheme.titleMedium),
@@ -142,6 +122,39 @@ class GroupDetailScreen extends ConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
     }
+  }
+}
+
+class _ActionTile extends StatelessWidget {
+  const _ActionTile({required this.icon, required this.label, required this.onTap});
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 32, color: AppColors.gold),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 15),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
