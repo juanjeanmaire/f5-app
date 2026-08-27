@@ -1,30 +1,30 @@
 name: Build APK
-
+ 
 on:
   workflow_dispatch:
   push:
     branches: [main]
-
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
+ 
     steps:
       - uses: actions/checkout@v4
-
+ 
       - name: Configurar Java
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
-
+ 
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-
+ 
       # El debug.keystore determina el SHA-1 que registramos en Google
       # Cloud — tiene que ser SIEMPRE el mismo entre builds, si no
       # Google Sign-In deja de andar en cada compilación nueva. Se
@@ -35,7 +35,7 @@ jobs:
         with:
           path: ~/.android/debug.keystore
           key: debug-keystore-v1
-
+ 
       - name: Generar el debug keystore si todavía no existe
         run: |
           mkdir -p ~/.android
@@ -47,7 +47,7 @@ jobs:
               -keyalg RSA -keysize 2048 -validity 10000 \
               -dname "CN=Android Debug,O=Android,C=US"
           fi
-
+ 
       - name: Mostrar el SHA-1 (para registrar en Google Cloud)
         run: |
           echo "===================================================="
@@ -55,33 +55,22 @@ jobs:
           keytool -list -v -keystore ~/.android/debug.keystore \
             -alias androiddebugkey -storepass android | grep "SHA1:"
           echo "===================================================="
-
-      - name: Generar las carpetas nativas (android/ios) si faltan
-        run: flutter create --platforms=android --org com.freire .
-
-      - name: Subir android/ como artifact (para commitear al repo una sola vez)
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-folder
-          path: android/
-
-      # El test de ejemplo que arma `flutter create` referencia una
-      # clase (MyApp) que no existe en nuestro main.dart real.
-      - name: Sacar el test de ejemplo (si se generó)
+ 
+      - name: Sacar el test de ejemplo (si existe)
         run: rm -f test/widget_test.dart
-
+ 
       - name: Instalar dependencias
         run: flutter pub get
-
+ 
       - name: Analizar (informativo, no bloquea el build)
         run: flutter analyze || true
-
+ 
       - name: Compilar el APK (debug, firmado con el keystore cacheado)
         run: |
           flutter build apk --debug \
             --dart-define=API_BASE_URL=https://f5-backend-8inv.onrender.com \
             --dart-define=GOOGLE_SERVER_CLIENT_ID=1092181236529-ovdp2jao98d3t2n165tiaccjtqibokmc.apps.googleusercontent.com
-
+ 
       - name: Publicar el APK como Release (descarga directa)
         uses: softprops/action-gh-release@v2
         with:
