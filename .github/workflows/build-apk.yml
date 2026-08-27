@@ -25,6 +25,11 @@ jobs:
         with:
           channel: 'stable'
 
+      # El debug.keystore determina el SHA-1 que registramos en Google
+      # Cloud — tiene que ser SIEMPRE el mismo entre builds, si no
+      # Google Sign-In deja de andar en cada compilación nueva. Se
+      # cachea acá; la primera corrida lo genera, las siguientes lo
+      # reusan tal cual.
       - name: Restaurar (o preparar) el debug keystore
         uses: actions/cache@v4
         with:
@@ -54,6 +59,14 @@ jobs:
       - name: Generar las carpetas nativas (android/ios) si faltan
         run: flutter create --platforms=android --org com.freire .
 
+      - name: Subir android/ como artifact (para commitear al repo una sola vez)
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-folder
+          path: android/
+
+      # El test de ejemplo que arma `flutter create` referencia una
+      # clase (MyApp) que no existe en nuestro main.dart real.
       - name: Sacar el test de ejemplo (si se generó)
         run: rm -f test/widget_test.dart
 
