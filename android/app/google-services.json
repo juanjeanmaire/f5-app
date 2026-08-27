@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1092181236529",
+    "project_id": "f5-app-506607",
+    "storage_bucket": "f5-app-506607.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092181236529:android:edf462f93e7854f6002e10",
+        "android_client_info": {
+          "package_name": "com.freire.f5_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1092181236529-ejf1q9kdhhubhp1rruh5bs68n7ag6bdf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.freire.f5_app",
+            "certificate_hash": "7f0565774d982cc2edce0c25ae4d0bd5e2a48895"
+          }
+        },
+        {
+          "client_id": "1092181236529-ovdp2jao98d3t2n165tiaccjtqibokmc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYws8NAFLlaZ0yeox64xX2OonRbRjcsvI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1092181236529-ovdp2jao98d3t2n165tiaccjtqibokmc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
