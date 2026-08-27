@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configurar Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -25,11 +25,6 @@ jobs:
         with:
           channel: 'stable'
 
-      # El debug.keystore determina el SHA-1 que registramos en Google
-      # Cloud — tiene que ser SIEMPRE el mismo entre builds, si no
-      # Google Sign-In deja de andar en cada compilación nueva. Se
-      # cachea acá; la primera corrida lo genera, las siguientes lo
-      # reusan tal cual.
       - name: Restaurar (o preparar) el debug keystore
         uses: actions/cache@v4
         with:
@@ -59,19 +54,6 @@ jobs:
       - name: Generar las carpetas nativas (android/ios) si faltan
         run: flutter create --platforms=android --org com.freire .
 
-      - name: Forzar el applicationId/namespace correcto
-        run: |
-          for f in android/app/build.gradle android/app/build.gradle.kts; do
-            if [ -f "$f" ]; then
-              sed -i 's/applicationId = ".*"/applicationId = "com.freire.f5app"/' "$f"
-              sed -i 's/applicationId ".*"/applicationId "com.freire.f5app"/' "$f"
-              sed -i 's/namespace = ".*"/namespace = "com.freire.f5app"/' "$f"
-              sed -i 's/namespace ".*"/namespace "com.freire.f5app"/' "$f"
-            fi
-          done
-
-      # El test de ejemplo que arma `flutter create` referencia una
-      # clase (MyApp) que no existe en nuestro main.dart real.
       - name: Sacar el test de ejemplo (si se generó)
         run: rm -f test/widget_test.dart
 
