@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
@@ -63,6 +64,36 @@ class ProfileScreen extends ConsumerWidget {
                     Text(user!.email, style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
+            ),
+            const SizedBox(height: 32),
+            Text('Mensajes', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            AsyncValueWidget<List<GroupMembership>>(
+              value: groupsAsync,
+              onRetry: () => ref.read(groupsControllerProvider.notifier).refresh(),
+              data: (memberships) {
+                final captainOf =
+                    memberships.where((m) => m.role == GroupRole.admin).toList();
+                if (captainOf.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text('No sos capitán de ningún grupo todavía.'),
+                  );
+                }
+                return Column(
+                  children: captainOf.map((m) {
+                    return Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.mail_outline),
+                        title: Text(m.group?.name ?? 'Tu grupo'),
+                        subtitle: const Text('Ver mensajes de los jugadores'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.push('/groups/${m.groupId}/inbox'),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
             ),
             const SizedBox(height: 32),
             Text('Mis grupos', style: Theme.of(context).textTheme.titleMedium),

@@ -86,38 +86,69 @@ class GroupDetailScreen extends ConsumerWidget {
               ),
             ],
             const SizedBox(height: 24),
-            Text('Miembros', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            AsyncValueWidget<List<GroupMembership>>(
-              value: membersAsync,
-              onRetry: () => ref.invalidate(groupMembersProvider(groupId)),
-              data: (members) {
-                return Column(
-                  children: members.map((m) {
-                    final isAdmin = m.role == GroupRole.admin;
-                    return Card(
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          child: Text(
-                            (m.user?.name.isNotEmpty ?? false)
-                                ? m.user!.name[0].toUpperCase()
-                                : '?',
+            if (isCurrentUserAdmin) ...[
+              Text('Miembros', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              AsyncValueWidget<List<GroupMembership>>(
+                value: membersAsync,
+                onRetry: () => ref.invalidate(groupMembersProvider(groupId)),
+                data: (members) {
+                  return Column(
+                    children: members.map((m) {
+                      final isAdmin = m.role == GroupRole.admin;
+                      return Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            child: Text(
+                              (m.user?.name.isNotEmpty ?? false)
+                                  ? m.user!.name[0].toUpperCase()
+                                  : '?',
+                            ),
                           ),
+                          title: Text(m.user?.name ?? m.userId),
+                          subtitle: Text(m.role.label),
+                          trailing: (isCurrentUserAdmin && !isAdmin)
+                              ? TextButton(
+                                  onPressed: () => _promote(context, ref, m.userId),
+                                  child: const Text('Hacer capitán'),
+                                )
+                              : (isAdmin ? const Icon(Icons.shield, size: 20) : null),
                         ),
-                        title: Text(m.user?.name ?? m.userId),
-                        subtitle: Text(m.role.label),
-                        trailing: (isCurrentUserAdmin && !isAdmin)
-                            ? TextButton(
-                                onPressed: () => _promote(context, ref, m.userId),
-                                child: const Text('Hacer capitán'),
-                              )
-                            : (isAdmin ? const Icon(Icons.shield, size: 20) : null),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ] else ...[
+              Text('Capitán', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              AsyncValueWidget<List<GroupMembership>>(
+                value: membersAsync,
+                onRetry: () => ref.invalidate(groupMembersProvider(groupId)),
+                data: (members) {
+                  final captains = members.where((m) => m.role == GroupRole.admin).toList();
+                  if (captains.isEmpty) {
+                    return const Text('No se encontró un capitán para este grupo.');
+                  }
+                  final captain = captains.first;
+                  return Card(
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        child: Text(
+                          (captain.user?.name.isNotEmpty ?? false)
+                              ? captain.user!.name[0].toUpperCase()
+                              : '?',
+                        ),
                       ),
-                    );
-                  }).toList(),
-                );
-              },
-            ),
+                      title: Text(captain.user?.name ?? captain.userId),
+                      subtitle: const Text('Capitán'),
+                      trailing: const Icon(Icons.chat_bubble_outline),
+                      onTap: () => context.push('/groups/$groupId/message-captain'),
+                    ),
+                  );
+                },
+              ),
+            ],
           ],
         ),
       ),

@@ -11,6 +11,9 @@ import '../../features/groups/presentation/groups_list_screen.dart';
 import '../../features/groups/presentation/join_group_screen.dart';
 import '../../features/matches/presentation/create_match_screen.dart';
 import '../../features/matches/presentation/match_history_screen.dart';
+import '../../features/messages/presentation/captain_conversation_screen.dart';
+import '../../features/messages/presentation/captain_inbox_screen.dart';
+import '../../features/messages/presentation/member_chat_screen.dart';
 import '../../features/players/presentation/player_match_history_screen.dart';
 import '../../features/players/presentation/players_list_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -98,6 +101,26 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => EloConfigScreen(
           groupId: state.pathParameters['groupId']!,
           isAdmin: state.extra as bool? ?? false,
+        ),
+      ),
+      GoRoute(
+        path: '/groups/:groupId/message-captain',
+        builder: (context, state) => MemberChatScreen(
+          groupId: state.pathParameters['groupId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/groups/:groupId/inbox',
+        builder: (context, state) => CaptainInboxScreen(
+          groupId: state.pathParameters['groupId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/groups/:groupId/inbox/:memberId',
+        builder: (context, state) => CaptainConversationScreen(
+          groupId: state.pathParameters['groupId']!,
+          memberId: state.pathParameters['memberId']!,
+          memberName: state.extra as String?,
         ),
       ),
     ],
