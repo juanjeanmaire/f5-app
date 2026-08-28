@@ -31,6 +31,13 @@ class GroupsController extends AsyncNotifier<List<GroupMembership>> {
     await refresh();
     return membership.group;
   }
+
+  /// Lanza ApiException si sos el único capitán del grupo — no la
+  /// atajamos acá a propósito, la maneja quien llame para mostrar el error.
+  Future<void> leaveGroup(String groupId) async {
+    await _repo.leaveGroup(groupId);
+    await refresh();
+  }
 }
 
 final groupsControllerProvider =

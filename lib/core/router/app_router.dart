@@ -7,7 +7,6 @@ import '../../features/groups/domain/group.dart';
 import '../../features/groups/presentation/create_group_screen.dart';
 import '../../features/groups/presentation/elo_config_screen.dart';
 import '../../features/groups/presentation/group_detail_screen.dart';
-import '../../features/groups/presentation/groups_list_screen.dart';
 import '../../features/groups/presentation/join_group_screen.dart';
 import '../../features/matches/presentation/create_match_screen.dart';
 import '../../features/matches/presentation/match_history_screen.dart';
@@ -18,6 +17,7 @@ import '../../features/players/presentation/player_match_history_screen.dart';
 import '../../features/players/presentation/players_list_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/team_generator/presentation/team_generator_screen.dart';
+import '../shell/main_shell_screen.dart';
 
 /// A diferencia de `core/api`, el router SÍ conoce a las features — es la
 /// capa de composición de la app, tiene sentido que dependa de ellas.
@@ -39,7 +39,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(path: '/', builder: (context, state) => const GroupsListScreen()),
+      GoRoute(path: '/', builder: (context, state) => const MainShellScreen()),
       GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
       GoRoute(
         path: '/groups/create',

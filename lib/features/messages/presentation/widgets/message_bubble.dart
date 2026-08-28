@@ -34,7 +34,7 @@ class MessageBubble extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 2),
                 child: Text(
-                  message.senderName,
+                  message.senderDisplayName,
                   style: textTheme.labelSmall?.copyWith(
                     color: AppColors.gold,
                     fontWeight: FontWeight.bold,

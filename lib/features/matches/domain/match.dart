@@ -44,6 +44,7 @@ class MatchTeamPlayer {
     required this.eloAfter,
     required this.eloDelta,
     this.playerName,
+    this.linkedUserId,
   });
 
   final String playerId;
@@ -52,8 +53,9 @@ class MatchTeamPlayer {
   final double eloAfter;
   final double eloDelta;
 
-  /// Viene del `player` anidado (el backend hace include: { player: true }).
+  /// Vienen del `player` anidado (el backend hace include: { player: true }).
   final String? playerName;
+  final String? linkedUserId;
 
   factory MatchTeamPlayer.fromJson(Map<String, dynamic> json) => MatchTeamPlayer(
         playerId: json['playerId'] as String,
@@ -62,6 +64,7 @@ class MatchTeamPlayer {
         eloAfter: (json['eloAfter'] as num).toDouble(),
         eloDelta: (json['eloDelta'] as num).toDouble(),
         playerName: (json['player'] as Map<String, dynamic>?)?['name'] as String?,
+        linkedUserId: (json['player'] as Map<String, dynamic>?)?['linkedUserId'] as String?,
       );
 }
 
@@ -75,6 +78,7 @@ class Match {
     required this.scoreB,
     required this.teamPlayers,
     this.location,
+    this.groupName,
   });
 
   final String id;
@@ -85,6 +89,11 @@ class Match {
   final int scoreA;
   final int scoreB;
   final List<MatchTeamPlayer> teamPlayers;
+
+  /// Solo viene poblado en GET /matches/mine (el backend hace
+  /// include: { group: true } ahí) — en los endpoints scoped a un grupo
+  /// puntual no hace falta, ya se sabe en qué grupo se está.
+  final String? groupName;
 
   List<MatchTeamPlayer> get teamA =>
       teamPlayers.where((p) => p.team == TeamSide.a).toList();
@@ -117,6 +126,7 @@ class Match {
         teamPlayers: (json['teamPlayers'] as List<dynamic>? ?? [])
             .map((e) => MatchTeamPlayer.fromJson(e as Map<String, dynamic>))
             .toList(),
+        groupName: (json['group'] as Map<String, dynamic>?)?['name'] as String?,
       );
 }
 

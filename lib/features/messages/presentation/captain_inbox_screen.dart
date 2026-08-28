@@ -48,7 +48,7 @@ class CaptainInboxScreen extends ConsumerWidget {
                         thread.memberName.isNotEmpty ? thread.memberName[0].toUpperCase() : '?',
                       ),
                     ),
-                    title: Text(thread.memberName),
+                    title: Text(thread.memberDisplayName),
                     subtitle: Text(
                       thread.lastMessage,
                       maxLines: 1,
@@ -57,7 +57,7 @@ class CaptainInboxScreen extends ConsumerWidget {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push(
                       '/groups/$groupId/inbox/${thread.memberId}',
-                      extra: thread.memberName,
+                      extra: thread.memberDisplayName,
                     ),
                   ),
                 );

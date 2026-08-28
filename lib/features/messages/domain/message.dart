@@ -1,3 +1,5 @@
+import '../../../shared/utils/display_name.dart';
+
 class ChatMessage {
   const ChatMessage({
     required this.id,
@@ -5,6 +7,7 @@ class ChatMessage {
     required this.createdAt,
     required this.senderId,
     required this.senderName,
+    this.senderNickname,
   });
 
   final String id;
@@ -12,6 +15,9 @@ class ChatMessage {
   final DateTime createdAt;
   final String senderId;
   final String senderName;
+  final String? senderNickname;
+
+  String get senderDisplayName => formatDisplayName(senderName, senderNickname);
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
         id: json['id'] as String,
@@ -19,6 +25,7 @@ class ChatMessage {
         createdAt: DateTime.parse(json['createdAt'] as String),
         senderId: json['senderId'] as String,
         senderName: (json['sender'] as Map<String, dynamic>?)?['name'] as String? ?? '',
+        senderNickname: (json['sender'] as Map<String, dynamic>?)?['nickname'] as String?,
       );
 }
 
@@ -30,16 +37,21 @@ class MessageThread {
     required this.memberName,
     required this.lastMessage,
     required this.lastMessageAt,
+    this.memberNickname,
   });
 
   final String memberId;
   final String memberName;
+  final String? memberNickname;
   final String lastMessage;
   final DateTime lastMessageAt;
+
+  String get memberDisplayName => formatDisplayName(memberName, memberNickname);
 
   factory MessageThread.fromJson(Map<String, dynamic> json) => MessageThread(
         memberId: json['memberId'] as String,
         memberName: json['memberName'] as String,
+        memberNickname: json['memberNickname'] as String?,
         lastMessage: json['lastMessage'] as String,
         lastMessageAt: DateTime.parse(json['lastMessageAt'] as String),
       );

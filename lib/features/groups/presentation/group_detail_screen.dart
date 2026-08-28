@@ -140,7 +140,7 @@ class GroupDetailScreen extends ConsumerWidget {
                                   : '?',
                             ),
                           ),
-                          title: Text(m.user?.name ?? m.userId),
+                          title: Text(m.user?.displayName ?? m.userId),
                           subtitle: Text(m.role.label),
                           trailing: (isCurrentUserAdmin && !isAdmin)
                               ? TextButton(
@@ -175,7 +175,7 @@ class GroupDetailScreen extends ConsumerWidget {
                               : '?',
                         ),
                       ),
-                      title: Text(captain.user?.name ?? captain.userId),
+                      title: Text(captain.user?.displayName ?? captain.userId),
                       subtitle: const Text('Capitán'),
                       trailing: const Icon(Icons.chat_bubble_outline),
                       onTap: () => context.push('/groups/$groupId/message-captain'),

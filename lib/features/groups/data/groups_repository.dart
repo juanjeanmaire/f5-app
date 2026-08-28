@@ -84,6 +84,16 @@ class GroupsRepository {
       throw ApiException.fromDioError(e);
     }
   }
+
+  /// El jugador se sale del grupo (no borra el grupo, solo su propia
+  /// membership). El backend rechaza esto si sos el único capitán.
+  Future<void> leaveGroup(String groupId) async {
+    try {
+      await _dio.delete('/groups/$groupId/membership');
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
 }
 
 final groupsRepositoryProvider = Provider<GroupsRepository>((ref) {

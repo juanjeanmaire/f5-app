@@ -21,9 +21,9 @@ class GroupsListScreen extends ConsumerWidget {
         title: const Text('Mis grupos'),
         actions: [
           IconButton(
-            tooltip: 'Mi perfil',
-            icon: const Icon(Icons.person_outline),
-            onPressed: () => context.push('/profile'),
+            tooltip: 'Crear o unirme a un grupo',
+            icon: const Icon(Icons.add),
+            onPressed: () => _showCreateOrJoinSheet(context),
           ),
         ],
       ),
@@ -47,7 +47,7 @@ class GroupsListScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          user != null ? '¡Hola, ${user.name}!' : '¡Hola!',
+                          user != null ? '¡Hola, ${user.displayName}!' : '¡Hola!',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 4),
@@ -67,11 +67,6 @@ class GroupsListScreen extends ConsumerWidget {
             );
           },
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showCreateOrJoinSheet(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Grupo'),
       ),
     );
   }

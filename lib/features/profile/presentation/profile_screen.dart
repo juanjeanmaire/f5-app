@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../auth/domain/user.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../groups/domain/group_membership.dart';
 import '../../groups/presentation/groups_controller.dart';
 import '../../groups/presentation/widgets/group_list_tile.dart';
+import '../data/users_repository.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -20,6 +22,147 @@ class ProfileScreen extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('No se pudo cerrar sesión: ${e.message}')),
       );
+    }
+  }
+
+  Future<void> _editProfile(BuildContext context, WidgetRef ref, AppUser? user) async {
+    final nameController = TextEditingController(text: user?.name ?? '');
+    final nicknameController = TextEditingController(text: user?.nickname ?? '');
+    final avatarController = TextEditingController(text: user?.avatarUrl ?? '');
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Editar perfil'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: nicknameController,
+                decoration: const InputDecoration(
+                  labelText: 'Apodo (opcional)',
+                  hintText: 'Aparece como Nombre "Apodo"',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: avatarController,
+                keyboardType: TextInputType.url,
+                decoration: const InputDecoration(
+                  labelText: 'Link a tu foto (opcional)',
+                  hintText: 'https://...',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+
+    if (saved != true) return;
+
+    try {
+      final repo = ref.read(usersRepositoryProvider);
+      await repo.updateProfile(
+        name: nameController.text.trim().isEmpty ? null : nameController.text.trim(),
+        nickname:
+            nicknameController.text.trim().isEmpty ? null : nicknameController.text.trim(),
+        avatarUrl: avatarController.text.trim().isEmpty ? null : avatarController.text.trim(),
+      );
+      ref.invalidate(authControllerProvider);
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  Future<void> _changePassword(BuildContext context, WidgetRef ref) async {
+    final currentController = TextEditingController();
+    final newController = TextEditingController();
+    final confirmController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Cambiar contraseña'),
+        content: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: currentController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Contraseña actual'),
+                  validator: (v) => (v == null || v.isEmpty) ? 'Requerido' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: newController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Contraseña nueva'),
+                  validator: (v) => (v == null || v.length < 6) ? 'Mínimo 6 caracteres' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: confirmController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Repetir contraseña nueva'),
+                  validator: (v) => v != newController.text ? 'No coincide' : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.of(dialogContext).pop(true);
+              }
+            },
+            child: const Text('Cambiar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final repo = ref.read(usersRepositoryProvider);
+      await repo.changePassword(
+        currentPassword: currentController.text,
+        newPassword: newController.text,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Contraseña actualizada')));
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
     }
   }
 
@@ -59,9 +202,30 @@ class ProfileScreen extends ConsumerWidget {
                         : null,
                   ),
                   const SizedBox(height: 12),
-                  Text(user?.name ?? '', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    user?.displayName ?? '',
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
                   if (user?.email != null)
                     Text(user!.email, style: Theme.of(context).textTheme.bodyMedium),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => _editProfile(context, ref, user),
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: const Text('Editar perfil'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => _changePassword(context, ref),
+                        icon: const Icon(Icons.lock_outline, size: 18),
+                        label: const Text('Cambiar contraseña'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
