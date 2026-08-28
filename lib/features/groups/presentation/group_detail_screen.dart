@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -72,7 +71,7 @@ class GroupDetailScreen extends ConsumerWidget {
           if (inviteCode != null)
             IconButton(
               tooltip: 'Invitar por WhatsApp',
-              icon: const FaIcon(FontAwesomeIcons.whatsapp),
+              icon: const Icon(Icons.chat_outlined),
               onPressed: () => _showInviteSheet(context, title, inviteCode),
             ),
           if (isCurrentUserAdmin)
@@ -468,7 +467,7 @@ class GroupDetailScreen extends ConsumerWidget {
                       ..showSnackBar(const SnackBar(content: Text('No se pudo abrir WhatsApp')));
                   }
                 },
-                icon: const FaIcon(FontAwesomeIcons.whatsapp, size: 18),
+                icon: const Icon(Icons.chat_outlined, size: 18),
                 label: const Text('Compartir por WhatsApp'),
               ),
             ],
