@@ -31,6 +31,12 @@ dependencies:
   # Gráficos (evolución de ELO)
   fl_chart: ^1.2.0
 
+  # Mapa embebido de la cancha (OpenStreetMap, sin API key)
+  webview_flutter: ^4.14.1
+
+  # Ícono de WhatsApp (Material no lo trae)
+  font_awesome_flutter: ^10.12.0
+
   cupertino_icons: ^1.0.6
 
 dev_dependencies:

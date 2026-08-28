@@ -40,8 +40,18 @@ class GroupsRepository {
     }
   }
 
-  /// Solo el capitán puede editar esto (hoy: la dirección de la cancha).
-  Future<Group> updateGroup(String groupId, {String? venueAddress}) async {
+  /// Solo el capitán puede editar el nombre del grupo.
+  Future<Group> updateGroupName(String groupId, String name) async {
+    try {
+      final response = await _dio.patch('/groups/$groupId', data: {'name': name});
+      return Group.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  /// Solo el capitán puede editar la dirección de la cancha.
+  Future<Group> updateGroupVenue(String groupId, {String? venueAddress}) async {
     try {
       final response = await _dio.patch(
         '/groups/$groupId',

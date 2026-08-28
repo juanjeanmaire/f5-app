@@ -45,6 +45,16 @@ class MatchesRepository {
       throw ApiException.fromDioError(e);
     }
   }
+
+  /// Solo el capitán puede borrar un partido — el backend revierte el
+  /// ELO/matchesPlayed de los participantes al valor anterior.
+  Future<void> deleteMatch(String groupId, String matchId) async {
+    try {
+      await _dio.delete('/groups/$groupId/matches/$matchId');
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
 }
 
 final matchesRepositoryProvider = Provider<MatchesRepository>((ref) {

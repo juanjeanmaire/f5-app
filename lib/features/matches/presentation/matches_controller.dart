@@ -39,6 +39,12 @@ class MatchesController extends FamilyAsyncNotifier<List<Match>, String> {
     await refresh();
     return match;
   }
+
+  /// Solo el capitán puede borrar un partido — revierte el ELO en el backend.
+  Future<void> deleteMatch(String matchId) async {
+    await _repo.deleteMatch(_groupId, matchId);
+    await refresh();
+  }
 }
 
 final matchesControllerProvider =
