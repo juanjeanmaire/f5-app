@@ -28,6 +28,9 @@ dependencies:
   # Tipografía de marca (Bebas Neue + Barlow)
   google_fonts: ^6.2.1
 
+  # Gráficos (evolución de ELO)
+  fl_chart: ^1.2.0
+
   cupertino_icons: ^1.0.6
 
 dev_dependencies:

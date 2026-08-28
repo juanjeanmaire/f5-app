@@ -119,3 +119,17 @@ class Match {
             .toList(),
       );
 }
+
+/// ELO de un jugador después de cada partido en el que participó, en
+/// orden cronológico (los partidos más viejos primero) — pensado para
+/// graficar su evolución. [matches] puede venir en cualquier orden.
+List<double> eloProgressionFor(List<Match> matches, String playerId) {
+  final relevant = matches
+      .where((m) => m.teamPlayers.any((tp) => tp.playerId == playerId))
+      .toList()
+    ..sort((a, b) => a.date.compareTo(b.date));
+
+  return relevant
+      .map((m) => m.teamPlayers.firstWhere((tp) => tp.playerId == playerId).eloAfter)
+      .toList();
+}

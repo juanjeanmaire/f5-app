@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../../shared/widgets/elo_line_chart.dart';
 import '../../matches/domain/match.dart';
 import '../../matches/presentation/matches_controller.dart';
 import '../../matches/presentation/widgets/team_elo_summary_row.dart';
@@ -56,6 +57,19 @@ class PlayerMatchHistoryScreen extends ConsumerWidget {
                 if (player != null)
                   _PlayerSummaryCard(player: player, matchCount: matches.length),
                 const SizedBox(height: 16),
+                if (matches.length >= 2) ...[
+                  Text('Evolución de ELO', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 16, 16, 8),
+                      child: EloLineChart(
+                        values: eloProgressionFor(matches, playerId),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 if (matches.isEmpty)
                   const Padding(
                     padding: EdgeInsets.only(top: 48),

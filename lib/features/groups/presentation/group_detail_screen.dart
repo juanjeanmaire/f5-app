@@ -8,7 +8,12 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/utils/whatsapp_share.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../../shared/widgets/elo_line_chart.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../matches/domain/match.dart';
+import '../../matches/presentation/matches_controller.dart';
+import '../../players/domain/player.dart';
+import '../../players/presentation/players_controller.dart';
 import '../data/groups_repository.dart';
 import '../domain/group.dart';
 import '../domain/group_membership.dart';
@@ -28,6 +33,8 @@ class GroupDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final groupAsync = ref.watch(groupDetailProvider(groupId));
     final membersAsync = ref.watch(groupMembersProvider(groupId));
+    final playersAsync = ref.watch(playersControllerProvider(groupId));
+    final matchesAsync = ref.watch(matchesControllerProvider(groupId));
     final currentUserId = ref.watch(authControllerProvider).valueOrNull?.id;
 
     final title = groupAsync.valueOrNull?.name ?? initialGroup?.name ?? 'Grupo';
@@ -35,6 +42,17 @@ class GroupDetailScreen extends ConsumerWidget {
     final isCurrentUserAdmin = (membersAsync.valueOrNull ?? []).any(
       (m) => m.userId == currentUserId && m.role == GroupRole.admin,
     );
+
+    Player? myPlayer;
+    final playersList = playersAsync.valueOrNull;
+    if (playersList != null && currentUserId != null) {
+      for (final p in playersList) {
+        if (p.linkedUserId == currentUserId) {
+          myPlayer = p;
+          break;
+        }
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
@@ -56,6 +74,23 @@ class GroupDetailScreen extends ConsumerWidget {
                 ref,
                 groupAsync.valueOrNull?.venueAddress ?? initialGroup?.venueAddress,
               ),
+            ),
+            const SizedBox(height: 10),
+            _HistorialRibbon(
+              myPlayer: myPlayer,
+              eloProgression: (myPlayer != null && matchesAsync.valueOrNull != null)
+                  ? eloProgressionFor(matchesAsync.valueOrNull!, myPlayer.id)
+                  : const [],
+              onTap: () {
+                if (myPlayer != null) {
+                  context.push(
+                    '/groups/$groupId/players/${myPlayer.id}/matches',
+                    extra: myPlayer.name,
+                  );
+                } else {
+                  context.push('/groups/$groupId/players', extra: isCurrentUserAdmin);
+                }
+              },
             ),
             const SizedBox(height: 10),
             _ActionRibbon(
@@ -316,6 +351,67 @@ class _VenueRibbon extends StatelessWidget {
                   Icons.open_in_new,
                   size: 18,
                   color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HistorialRibbon extends StatelessWidget {
+  const _HistorialRibbon({
+    required this.myPlayer,
+    required this.eloProgression,
+    required this.onTap,
+  });
+
+  final Player? myPlayer;
+  final List<double> eloProgression;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          decoration: const BoxDecoration(
+            border: Border(left: BorderSide(color: AppColors.gold, width: 4)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.show_chart, color: AppColors.gold, size: 26),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text('HISTORIAL', style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
+                ],
+              ),
+              if (myPlayer == null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    'Reclamá tu jugador para ver tu evolución de ELO',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: EloLineChart(values: eloProgression, compact: true, height: 60),
                 ),
             ],
           ),
