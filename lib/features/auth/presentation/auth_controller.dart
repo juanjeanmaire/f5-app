@@ -13,10 +13,14 @@ import '../domain/user.dart';
 /// Estado de sesión de la app: `null` = no autenticado, `AppUser` = autenticado.
 /// El router (core/router/app_router.dart) observa este provider para decidir
 /// si mostrar /login o el resto de la app.
+///
+/// Usa google_sign_in 7.x (basado en Android Credential Manager) — la API
+/// vieja (6.x, basada en el SDK de Google Play Services Auth) fue
+/// deprecada y dejó de funcionar en dispositivos reales.
 class AuthController extends AsyncNotifier<AppUser?> {
   late final AuthRepository _repo;
   late final SecureStorage _storage;
-  late final GoogleSignIn _googleSignIn;
+  bool _googleSignInInitialized = false;
 
   @override
   FutureOr<AppUser?> build() async {
@@ -25,12 +29,17 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
     _repo = ref.watch(authRepositoryProvider);
     _storage = ref.watch(secureStorageProvider);
-    _googleSignIn = GoogleSignIn(
-      serverClientId: AppConfig.googleServerClientId.isEmpty
-          ? null
-          : AppConfig.googleServerClientId,
-      scopes: const ['email'],
-    );
+
+    // google_sign_in 7.x exige llamar initialize() una sola vez, antes de
+    // cualquier otro método del plugin.
+    if (!_googleSignInInitialized) {
+      await GoogleSignIn.instance.initialize(
+        serverClientId: AppConfig.googleServerClientId.isEmpty
+            ? null
+            : AppConfig.googleServerClientId,
+      );
+      _googleSignInInitialized = true;
+    }
 
     final token = await _storage.readToken();
     if (token == null) return null;
@@ -46,13 +55,22 @@ class AuthController extends AsyncNotifier<AppUser?> {
   Future<void> signInWithGoogle() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final googleAccount = await _googleSignIn.signIn();
-      if (googleAccount == null) {
-        throw ApiException(message: 'Inicio de sesión cancelado');
+      final GoogleSignInAccount account;
+      try {
+        // scopeHint: pedimos el email ya en el paso de autenticación, para
+        // que el idToken resultante incluya el claim de email (lo valida
+        // el backend).
+        account = await GoogleSignIn.instance.authenticate(
+          scopeHint: const ['email'],
+        );
+      } on GoogleSignInException catch (e) {
+        if (e.code == GoogleSignInExceptionCode.canceled) {
+          throw ApiException(message: 'Inicio de sesión cancelado');
+        }
+        throw ApiException(message: 'No se pudo iniciar sesión con Google (${e.code})');
       }
 
-      final googleAuth = await googleAccount.authentication;
-      final idToken = googleAuth.idToken;
+      final idToken = account.authentication.idToken;
       if (idToken == null) {
         throw ApiException(message: 'No se pudo obtener el token de Google');
       }
@@ -64,7 +82,7 @@ class AuthController extends AsyncNotifier<AppUser?> {
   }
 
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    await GoogleSignIn.instance.signOut();
     await _storage.deleteToken();
     state = const AsyncData(null);
   }
