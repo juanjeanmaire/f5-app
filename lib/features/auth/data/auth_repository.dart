@@ -5,8 +5,8 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_exception.dart';
 import '../domain/user.dart';
 
-class GoogleLoginResult {
-  const GoogleLoginResult({required this.accessToken, required this.user});
+class LoginResult {
+  const LoginResult({required this.accessToken, required this.user});
 
   final String accessToken;
   final AppUser user;
@@ -17,12 +17,20 @@ class AuthRepository {
 
   final Dio _dio;
 
-  /// POST /auth/google — intercambia el idToken de Google por el JWT propio.
-  Future<GoogleLoginResult> loginWithGoogle(String idToken) async {
+  /// POST /auth/login — sin registro separado: si el email no existe, se
+  /// crea la cuenta con esta contraseña; si existe, tiene que coincidir.
+  Future<LoginResult> login({
+    required String email,
+    required String name,
+    required String password,
+  }) async {
     try {
-      final response = await _dio.post('/auth/google', data: {'idToken': idToken});
+      final response = await _dio.post(
+        '/auth/login',
+        data: {'email': email, 'name': name, 'password': password},
+      );
       final data = response.data as Map<String, dynamic>;
-      return GoogleLoginResult(
+      return LoginResult(
         accessToken: data['accessToken'] as String,
         user: AppUser.fromJson(data['user'] as Map<String, dynamic>),
       );

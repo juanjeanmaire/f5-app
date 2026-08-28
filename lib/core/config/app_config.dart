@@ -2,8 +2,7 @@
 /// --dart-define, sin hardcodear nada sensible en el código.
 ///
 /// Ejemplo:
-///   flutter run --dart-define=API_BASE_URL=http://192.168.1.10:3000 \
-///                --dart-define=GOOGLE_SERVER_CLIENT_ID=xxxx.apps.googleusercontent.com
+///   flutter run --dart-define=API_BASE_URL=http://192.168.1.10:3000
 class AppConfig {
   AppConfig._();
 
@@ -13,13 +12,5 @@ class AppConfig {
   static const apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://10.0.2.2:3000',
-  );
-
-  /// El "server client ID" (tipo Web application) de Google Cloud Console.
-  /// Es el mismo valor que GOOGLE_CLIENT_ID en el .env del backend — el
-  /// idToken que genera este client ID es el que el backend valida.
-  static const googleServerClientId = String.fromEnvironment(
-    'GOOGLE_SERVER_CLIENT_ID',
-    defaultValue: '',
   );
 }

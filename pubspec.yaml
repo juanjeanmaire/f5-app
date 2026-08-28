@@ -19,9 +19,6 @@ dependencies:
   # Cliente HTTP
   dio: ^5.4.3+1
 
-  # Login con Google
-  google_sign_in: ^7.2.0
-
   # Guardar el JWT de forma segura en el dispositivo
   flutter_secure_storage: ^9.2.2
 
