@@ -66,6 +66,39 @@ class PlayersRepository {
       throw ApiException.fromDioError(e);
     }
   }
+
+  /// Traspasa el historial de [mergeFromPlayerId] (el jugador viejo, con
+  /// partidos ya jugados) a [keepPlayerId] (normalmente el recién creado,
+  /// que todavía no jugó nada) — el viejo se borra al terminar.
+  Future<Player> mergePlayers(
+    String groupId, {
+    required String keepPlayerId,
+    required String mergeFromPlayerId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/groups/$groupId/players/merge',
+        data: {'keepPlayerId': keepPlayerId, 'mergeFromPlayerId': mergeFromPlayerId},
+      );
+      return Player.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  /// El capitán le adjudica un jugador viejo sin cuenta a otro miembro del
+  /// grupo (típicamente alguien que se acaba de unir por invitación).
+  Future<Player> assignPlayer(String groupId, String playerId, String targetUserId) async {
+    try {
+      final response = await _dio.post(
+        '/groups/$groupId/players/$playerId/assign',
+        data: {'targetUserId': targetUserId},
+      );
+      return Player.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
 }
 
 final playersRepositoryProvider = Provider<PlayersRepository>((ref) {

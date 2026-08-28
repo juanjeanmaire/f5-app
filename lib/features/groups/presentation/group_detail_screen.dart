@@ -14,6 +14,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../matches/domain/match.dart';
 import '../../matches/presentation/matches_controller.dart';
 import '../../players/domain/player.dart';
+import '../../players/data/players_repository.dart';
 import '../../players/presentation/players_controller.dart';
 import '../data/groups_repository.dart';
 import '../domain/group.dart';
@@ -179,9 +180,22 @@ class GroupDetailScreen extends ConsumerWidget {
                 value: membersAsync,
                 onRetry: () => ref.invalidate(groupMembersProvider(groupId)),
                 data: (members) {
+                  final allPlayers = playersAsync.valueOrNull ?? [];
                   return Column(
                     children: members.map((m) {
                       final isAdmin = m.role == GroupRole.admin;
+                      final hasLinkedPlayer =
+                          allPlayers.any((p) => p.linkedUserId == m.userId);
+                      final menuItems = <PopupMenuEntry<String>>[
+                        if (!isAdmin)
+                          const PopupMenuItem(value: 'promote', child: Text('Hacer capitán')),
+                        if (!hasLinkedPlayer)
+                          const PopupMenuItem(
+                            value: 'assign',
+                            child: Text('Adjudicar jugador viejo'),
+                          ),
+                      ];
+
                       return Card(
                         child: ListTile(
                           leading: CircleAvatar(
@@ -193,12 +207,23 @@ class GroupDetailScreen extends ConsumerWidget {
                           ),
                           title: Text(m.user?.displayName ?? m.userId),
                           subtitle: Text(m.role.label),
-                          trailing: (isCurrentUserAdmin && !isAdmin)
-                              ? TextButton(
-                                  onPressed: () => _promote(context, ref, m.userId),
-                                  child: const Text('Hacer capitán'),
-                                )
-                              : (isAdmin ? const Icon(Icons.shield, size: 20) : null),
+                          trailing: menuItems.isEmpty
+                              ? (isAdmin ? const Icon(Icons.shield, size: 20) : null)
+                              : PopupMenuButton<String>(
+                                  onSelected: (value) {
+                                    if (value == 'promote') _promote(context, ref, m.userId);
+                                    if (value == 'assign') {
+                                      _assignPlayer(
+                                        context,
+                                        ref,
+                                        m.userId,
+                                        m.user?.displayName ?? m.userId,
+                                        allPlayers,
+                                      );
+                                    }
+                                  },
+                                  itemBuilder: (context) => menuItems,
+                                ),
                         ),
                       );
                     }).toList(),
@@ -244,6 +269,77 @@ class GroupDetailScreen extends ConsumerWidget {
   Future<void> _promote(BuildContext context, WidgetRef ref, String targetUserId) async {
     try {
       await ref.read(groupMembersActionsProvider).promoteToAdmin(groupId, targetUserId);
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  /// El capitán le adjudica un jugador viejo (sin cuenta vinculada) a un
+  /// miembro puntual — típicamente alguien que se acaba de unir por
+  /// invitación y ya tenía historial de antes.
+  Future<void> _assignPlayer(
+    BuildContext context,
+    WidgetRef ref,
+    String targetUserId,
+    String targetLabel,
+    List<Player> allPlayers,
+  ) async {
+    final candidates = allPlayers.where((p) => p.linkedUserId == null).toList();
+
+    if (candidates.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No hay jugadores sin cuenta vinculada en este grupo.')),
+      );
+      return;
+    }
+
+    Player? selected;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setState) => AlertDialog(
+          title: Text('¿Qué jugador viejo es $targetLabel?'),
+          content: DropdownButtonFormField<Player>(
+            initialValue: selected,
+            hint: const Text('Elegí un jugador'),
+            isExpanded: true,
+            items: candidates
+                .map(
+                  (p) => DropdownMenuItem(
+                    value: p,
+                    child: Text('${p.name} (ELO ${p.elo.round()})'),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) => setState(() => selected = value),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: selected == null
+                  ? null
+                  : () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Adjudicar'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true || selected == null || !context.mounted) return;
+
+    try {
+      final repo = ref.read(playersRepositoryProvider);
+      await repo.assignPlayer(groupId, selected!.id, targetUserId);
+      ref.invalidate(playersControllerProvider(groupId));
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('"${selected!.name}" adjudicado a $targetLabel')),
+      );
     } on ApiException catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
