@@ -5,6 +5,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../domain/message.dart';
+import '../data/messages_repository.dart';
 import 'messages_controller.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/message_composer.dart';
