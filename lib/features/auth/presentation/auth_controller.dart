@@ -53,6 +53,11 @@ class AuthController extends AsyncNotifier<AppUser?> {
   }
 
   Future<void> signOut() async {
+    // Si el logout del backend falla, no desconectamos localmente: el
+    // servidor seguiría pensando que la sesión está activa (no vence
+    // sola), y sería confuso mostrar la pantalla de login sin haberla
+    // liberado de verdad — quedaría bloqueado para volver a entrar.
+    await _repo.logout();
     await _storage.deleteToken();
     state = const AsyncData(null);
   }

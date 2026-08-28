@@ -48,6 +48,17 @@ class AuthRepository {
       throw ApiException.fromDioError(e);
     }
   }
+
+  /// POST /auth/logout — libera la sesión del lado del servidor, para que
+  /// se pueda volver a loguear (mismo u otro dispositivo). Sin esto, el
+  /// login queda bloqueado para siempre (la sesión no vence sola).
+  Future<void> logout() async {
+    try {
+      await _dio.post('/auth/logout');
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../groups/domain/group_membership.dart';
@@ -9,6 +10,17 @@ import '../../groups/presentation/widgets/group_list_tile.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
+
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(authControllerProvider.notifier).signOut();
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo cerrar sesión: ${e.message}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,7 +34,7 @@ class ProfileScreen extends ConsumerWidget {
           IconButton(
             tooltip: 'Cerrar sesión',
             icon: const Icon(Icons.logout),
-            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+            onPressed: () => _signOut(context, ref),
           ),
         ],
       ),
