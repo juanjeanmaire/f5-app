@@ -46,36 +46,33 @@ class GroupDetailScreen extends ConsumerWidget {
           children: [
             if (inviteCode != null) _InviteCodeCard(groupName: title, inviteCode: inviteCode),
             const SizedBox(height: 16),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.1,
-              children: [
-                _ActionTile(
-                  icon: Icons.sports_soccer_outlined,
-                  label: 'JUGADORES',
-                  onTap: () => context.push('/groups/$groupId/players', extra: isCurrentUserAdmin),
-                ),
-                _ActionTile(
-                  icon: Icons.event_note_outlined,
-                  label: 'PARTIDOS',
-                  onTap: () => context.push('/groups/$groupId/matches', extra: isCurrentUserAdmin),
-                ),
-                _ActionTile(
-                  icon: Icons.shuffle,
-                  label: 'ARMAR\nEQUIPOS',
-                  onTap: () => context.push('/groups/$groupId/team-generator', extra: isCurrentUserAdmin),
-                ),
-                _ActionTile(
-                  icon: Icons.tune,
-                  label: 'CONFIG.\nELO',
-                  onTap: () => context.push('/groups/$groupId/elo-config', extra: isCurrentUserAdmin),
-                ),
-              ],
+            _ActionRibbon(
+              icon: Icons.sports_soccer_outlined,
+              label: 'JUGADORES',
+              onTap: () => context.push('/groups/$groupId/players', extra: isCurrentUserAdmin),
             ),
+            const SizedBox(height: 10),
+            _ActionRibbon(
+              icon: Icons.event_note_outlined,
+              label: 'PARTIDOS',
+              onTap: () => context.push('/groups/$groupId/matches', extra: isCurrentUserAdmin),
+            ),
+            const SizedBox(height: 10),
+            _ActionRibbon(
+              icon: Icons.shuffle,
+              label: 'ARMAR EQUIPOS',
+              onTap: () => context.push('/groups/$groupId/team-generator', extra: isCurrentUserAdmin),
+            ),
+            // Solo el capitán ve (y puede editar) la configuración de ELO
+            // del grupo — el resto de los jugadores ni siquiera ve esta opción.
+            if (isCurrentUserAdmin) ...[
+              const SizedBox(height: 10),
+              _ActionRibbon(
+                icon: Icons.tune,
+                label: 'CONFIGURACIÓN DE ELO',
+                onTap: () => context.push('/groups/$groupId/elo-config', extra: isCurrentUserAdmin),
+              ),
+            ],
             const SizedBox(height: 24),
             Text('Miembros', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
@@ -125,8 +122,8 @@ class GroupDetailScreen extends ConsumerWidget {
   }
 }
 
-class _ActionTile extends StatelessWidget {
-  const _ActionTile({required this.icon, required this.label, required this.onTap});
+class _ActionRibbon extends StatelessWidget {
+  const _ActionRibbon({required this.icon, required this.label, required this.onTap});
 
   final IconData icon;
   final String label;
@@ -136,19 +133,28 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          decoration: const BoxDecoration(
+            border: Border(left: BorderSide(color: AppColors.gold, width: 4)),
+          ),
+          child: Row(
             children: [
-              Icon(icon, size: 32, color: AppColors.gold),
-              const SizedBox(height: 10),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 15),
+              Icon(icon, color: AppColors.gold, size: 26),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
               ),
             ],
           ),

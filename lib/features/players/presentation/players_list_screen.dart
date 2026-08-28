@@ -147,8 +147,16 @@ class _PlayerTile extends ConsumerWidget {
             '${player.matchesPlayed == 1 ? 'partido' : 'partidos'}'
             '${player.active ? '' : ' · Inactivo'}',
           ),
-          trailing: isAdmin
-              ? PopupMenuButton<String>(
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (canClaim)
+                TextButton(
+                  onPressed: () => _claim(context, ref),
+                  child: const Text('Reclamar'),
+                ),
+              if (isAdmin)
+                PopupMenuButton<String>(
                   onSelected: (value) => _handleAdminAction(context, ref, value),
                   itemBuilder: (context) => [
                     const PopupMenuItem(value: 'rename', child: Text('Renombrar')),
@@ -158,13 +166,9 @@ class _PlayerTile extends ConsumerWidget {
                     ),
                     const PopupMenuItem(value: 'delete', child: Text('Borrar')),
                   ],
-                )
-              : (canClaim
-                  ? TextButton(
-                      onPressed: () => _claim(context, ref),
-                      child: const Text('Reclamar'),
-                    )
-                  : null),
+                ),
+            ],
+          ),
         ),
       ),
     );
