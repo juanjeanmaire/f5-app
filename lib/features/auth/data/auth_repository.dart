@@ -19,15 +19,18 @@ class AuthRepository {
 
   /// POST /auth/login — sin registro separado: si el email no existe, se
   /// crea la cuenta con esta contraseña; si existe, tiene que coincidir.
+  /// [name] es opcional: si no se manda, el backend usa la parte antes de
+  /// la @ del email como nombre por defecto (se puede editar después
+  /// desde el perfil).
   Future<LoginResult> login({
     required String email,
-    required String name,
     required String password,
+    String? name,
   }) async {
     try {
       final response = await _dio.post(
         '/auth/login',
-        data: {'email': email, 'name': name, 'password': password},
+        data: {'email': email, 'password': password, if (name != null) 'name': name},
       );
       final data = response.data as Map<String, dynamic>;
       return LoginResult(

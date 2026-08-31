@@ -41,12 +41,11 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<void> login({
     required String email,
-    required String name,
     required String password,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final result = await _repo.login(email: email, name: name, password: password);
+      final result = await _repo.login(email: email, password: password);
       await _storage.saveToken(result.accessToken);
       return result.user;
     });

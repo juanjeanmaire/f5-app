@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -378,30 +381,9 @@ class GroupDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _editVenue(BuildContext context, WidgetRef ref, String? currentAddress) async {
-    final controller = TextEditingController(text: currentAddress ?? '');
     final newAddress = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Dirección de la cancha'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLines: 2,
-          decoration: const InputDecoration(
-            hintText: 'Ej: Complejo Deportivo Los Pinos, Av. Siempreviva 742',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
+      builder: (dialogContext) => _VenueAddressDialog(initialAddress: currentAddress),
     );
 
     if (newAddress == null) return; // se canceló el diálogo
@@ -658,6 +640,142 @@ class _PlayerEloRibbonState extends State<_PlayerEloRibbon> {
 
 /// Segundo banner: la cancha. Tocarlo lo expande al doble para mostrar un
 /// mapa embebido (OpenStreetMap, sin API key) con la dirección cargada.
+/// Diálogo para escribir la dirección de la cancha, con sugerencias en
+/// vivo (Nominatim/OpenStreetMap — el mismo servicio que usa el mapa
+/// embebido, sin necesitar API key). Si la búsqueda falla por lo que sea,
+/// el capitán igual puede escribir la dirección a mano y guardarla tal cual.
+class _VenueAddressDialog extends StatefulWidget {
+  const _VenueAddressDialog({this.initialAddress});
+
+  final String? initialAddress;
+
+  @override
+  State<_VenueAddressDialog> createState() => _VenueAddressDialogState();
+}
+
+class _VenueAddressDialogState extends State<_VenueAddressDialog> {
+  late final TextEditingController _controller;
+  Timer? _debounce;
+  List<String> _suggestions = [];
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialAddress ?? '');
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onChanged(String value) {
+    _debounce?.cancel();
+    final query = value.trim();
+    if (query.length < 3) {
+      setState(() => _suggestions = []);
+      return;
+    }
+    // Esperamos un toque después de que dejó de tipear, para no
+    // bombardear la API con un pedido por cada letra.
+    _debounce = Timer(const Duration(milliseconds: 600), () => _search(query));
+  }
+
+  Future<void> _search(String query) async {
+    setState(() => _loading = true);
+    try {
+      final dio = Dio();
+      final response = await dio.get(
+        'https://nominatim.openstreetmap.org/search',
+        queryParameters: {'q': query, 'format': 'jsonv2', 'limit': '5'},
+        options: Options(
+          headers: {'User-Agent': 'F5App/1.0 (contacto: juangjeanmaire@gmail.com)'},
+        ),
+      );
+      final results = (response.data as List)
+          .map((e) => (e as Map<String, dynamic>)['display_name'] as String)
+          .toList();
+      if (mounted) setState(() => _suggestions = results);
+    } catch (_) {
+      // Silencioso a propósito: si falla la búsqueda, el capitán igual
+      // puede escribir la dirección a mano y guardarla tal cual.
+      if (mounted) setState(() => _suggestions = []);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Dirección de la cancha'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              maxLines: 2,
+              onChanged: _onChanged,
+              decoration: InputDecoration(
+                hintText: 'Ej: Complejo Deportivo Los Pinos, Av. Siempreviva 742',
+                suffixIcon: _loading
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+            if (_suggestions.isNotEmpty)
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 180),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _suggestions.length,
+                  itemBuilder: (context, index) => ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.location_on_outlined, size: 18),
+                    title: Text(
+                      _suggestions[index],
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    onTap: () {
+                      _controller.text = _suggestions[index];
+                      setState(() => _suggestions = []);
+                    },
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(_controller.text.trim()),
+          child: const Text('Guardar'),
+        ),
+      ],
+    );
+  }
+}
+
 class _VenueRibbon extends StatefulWidget {
   const _VenueRibbon({
     required this.venueAddress,

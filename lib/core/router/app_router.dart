@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -19,14 +20,29 @@ import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/team_generator/presentation/team_generator_screen.dart';
 import '../shell/main_shell_screen.dart';
 
+/// Puente entre el estado de sesión (Riverpod) y GoRouter: en vez de que
+/// el router entero dependa de `ref.watch(authControllerProvider)` —lo
+/// que recreaba TODO el GoRouter (y reseteaba la navegación a /login)
+/// cada vez que cambiaba el usuario logueado, incluso por cosas chicas
+/// como guardar el apodo— este notifier solo AVISA que algo cambió, y
+/// GoRouter vuelve a evaluar el redirect sin perder su estado interno.
+class _AuthRefreshNotifier extends ChangeNotifier {
+  _AuthRefreshNotifier(Ref ref) {
+    ref.listen(authControllerProvider, (_, __) => notifyListeners());
+  }
+}
+
 /// A diferencia de `core/api`, el router SÍ conoce a las features — es la
 /// capa de composición de la app, tiene sentido que dependa de ellas.
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authControllerProvider);
+  final refreshNotifier = _AuthRefreshNotifier(ref);
+  ref.onDispose(refreshNotifier.dispose);
 
   return GoRouter(
     initialLocation: '/login',
+    refreshListenable: refreshNotifier,
     redirect: (context, state) {
+      final authState = ref.read(authControllerProvider);
       final isLoggingIn = state.matchedLocation == '/login';
       final isLoading = authState.isLoading;
       final isAuthenticated = authState.valueOrNull != null;
