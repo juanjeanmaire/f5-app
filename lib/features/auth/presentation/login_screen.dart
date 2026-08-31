@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/entrance_animation.dart';
+import '../../../shared/widgets/pixel_f5_logo.dart';
 import '../../../shared/widgets/pixel_soccer_ball.dart';
 import 'auth_controller.dart';
 
@@ -20,6 +22,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  /// authState.isLoading es true tanto en la carga inicial de la sesión
+  /// (al abrir la app) como mientras se envía un login — para no
+  /// reemplazar el formulario a mitad de un envío, solo mostramos la
+  /// pantalla de carga (marrón + logo) antes de que el usuario haya
+  /// tocado "Ingresar" por primera vez.
+  bool _hasSubmitted = false;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -29,6 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    _hasSubmitted = true;
 
     await ref.read(authControllerProvider.notifier).login(
           email: _emailController.text.trim(),
@@ -59,6 +69,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final isLoading = authState.isLoading;
     final textTheme = Theme.of(context).textTheme;
+
+    // Carga inicial de la sesión: misma pantalla que la carga nativa del
+    // sistema operativo (mismo fondo, mismo símbolo), para que la
+    // transición sea continua — con la animación de entrada del logo.
+    if (isLoading && !_hasSubmitted) {
+      return const Scaffold(
+        backgroundColor: AppColors.iconBrown,
+        body: Center(
+          child: EntranceAnimation(
+            child: PixelF5Logo(pixelSize: 16, shadowOffset: 5),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.navyDeep,

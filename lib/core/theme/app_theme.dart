@@ -18,6 +18,12 @@ class AppColors {
   static const gold = Color(0xFFC9A227);
   static const cream = Color(0xFFF1E8D6);
   static const error = Color(0xFFE0654B);
+
+  /// El marrón claro del ícono de la app y la pantalla de carga nativa
+  /// (ver assets/icon/ y pubspec.yaml) — no se usa en el resto de la UI,
+  /// solo en ese momento puntual de apertura para que quede idéntico al
+  /// ícono del sistema operativo.
+  static const iconBrown = Color(0xFFD9C6A0);
 }
 
 class AppTheme {

@@ -41,5 +41,38 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
 
+  # Genera el ícono real de la app (launcher) para Android/iOS a partir
+  # de assets/icon/icon.png — se corre en CI antes de compilar, no hace
+  # falta correrlo a mano.
+  flutter_launcher_icons: ^0.14.4
+
+  # Genera la pantalla de carga nativa (la que se ve antes de que Flutter
+  # termine de arrancar) — también se corre en CI antes de compilar.
+  flutter_native_splash: ^2.4.8
+
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/icon.png
+    - assets/icon/icon_foreground.png
+
+# Mismo diseño pixel-art que el resto de la app: fondo marrón claro,
+# símbolo "F5" azul marino con sombra. adaptive_icon_* es lo que usan los
+# celulares Android modernos (8+) para adaptar la forma del ícono
+# (círculo, squircle, etc.) según el launcher del fabricante.
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#D9C6A0"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+
+# La pantalla de carga nativa usa el mismo símbolo (sin fondo, ya que el
+# color de fondo se define aparte acá) sobre el mismo marrón claro.
+flutter_native_splash:
+  color: "#D9C6A0"
+  image: "assets/icon/icon_foreground.png"
+  android_12:
+    color: "#D9C6A0"
+    image: "assets/icon/icon_foreground.png"
