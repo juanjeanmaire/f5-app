@@ -58,7 +58,7 @@ class EloLineChart extends StatelessWidget {
                 reservedSize: 42,
                 getTitlesWidget: (value, meta) => Text(
                   value.round().toString(),
-                  style: const TextStyle(fontSize: 10, color: AppColors.cream),
+                  style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurface),
                 ),
               ),
             ),

@@ -6,7 +6,6 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/entrance_animation.dart';
 import '../../../shared/widgets/pixel_f5_logo.dart';
-import '../../../shared/widgets/pixel_soccer_ball.dart';
 import 'auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -85,7 +84,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.navyDeep,
+      backgroundColor: AppColors.iconBrown,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -100,25 +99,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Center(
                       child: Column(
                         children: [
-                          const PixelSoccerBall(
-                            size: 96,
-                            baseColor: AppColors.cream,
-                            patternColor: AppColors.navy,
-                          ),
+                          const PixelF5Logo(pixelSize: 16, shadowOffset: 5),
                           const SizedBox(height: 16),
-                          Text(
-                            'F5',
-                            style: textTheme.headlineLarge?.copyWith(
-                              color: AppColors.gold,
-                              fontSize: 56,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
                           Text(
                             'Cargá tus partidos, seguí tu ELO y armá equipos parejos.',
                             textAlign: TextAlign.center,
                             style: textTheme.bodyMedium?.copyWith(
-                              color: AppColors.cream.withValues(alpha: 0.8),
+                              color: AppColors.navyDeep.withValues(alpha: 0.8),
                             ),
                           ),
                         ],
@@ -131,7 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       'poner tu nombre desde tu perfil.',
                       textAlign: TextAlign.center,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.cream.withValues(alpha: 0.6),
+                        color: AppColors.navyDeep.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -187,7 +174,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       '¿Olvidaste tu contraseña? Escribile al dueño de la app.',
                       textAlign: TextAlign.center,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.cream.withValues(alpha: 0.6),
+                        color: AppColors.navyDeep.withValues(alpha: 0.6),
                       ),
                     ),
                   ],

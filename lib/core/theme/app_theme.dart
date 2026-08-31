@@ -5,11 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import 'league_teams.dart';
 
-/// Paleta de marca: navy + dorado + crema, inspirada en un jersey/trofeo
-/// de fútbol vintage. Calibrada a mano (no generada por seed) para tener
-/// control total sobre estos valores exactos. El dorado es el acento por
-/// DEFECTO — si el usuario elige un equipo favorito en su perfil, ese
-/// acento se reemplaza por el color de ese equipo (ver [AppTheme.build]).
+/// Paleta de marca: marrón claro + azul marino, la misma que el ícono de
+/// la app y la pantalla de carga nativa (ver assets/icon/). El azul
+/// marino es el acento por DEFECTO — si el usuario elige un equipo
+/// favorito en su perfil, ese acento se reemplaza por el color de ese
+/// equipo (ver [AppTheme.build]); el fondo marrón y el texto oscuro se
+/// mantienen siempre iguales.
 class AppColors {
   AppColors._();
 
@@ -19,10 +20,8 @@ class AppColors {
   static const cream = Color(0xFFF1E8D6);
   static const error = Color(0xFFE0654B);
 
-  /// El marrón claro del ícono de la app y la pantalla de carga nativa
-  /// (ver assets/icon/ y pubspec.yaml) — no se usa en el resto de la UI,
-  /// solo en ese momento puntual de apertura para que quede idéntico al
-  /// ícono del sistema operativo.
+  /// El marrón claro de fondo — el mismo del ícono de la app y la
+  /// pantalla de carga nativa (ver assets/icon/ y pubspec.yaml).
   static const iconBrown = Color(0xFFD9C6A0);
 }
 
@@ -33,11 +32,11 @@ class AppTheme {
   /// camiseta"), Barlow para el cuerpo del texto (buena legibilidad en listas).
   static TextTheme _buildTextTheme(ColorScheme scheme) {
     final base = GoogleFonts.barlowTextTheme(
-      ThemeData(brightness: Brightness.dark).textTheme,
+      ThemeData(brightness: Brightness.light).textTheme,
     ).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
 
     final display = GoogleFonts.bebasNeueTextTheme(
-      ThemeData(brightness: Brightness.dark).textTheme,
+      ThemeData(brightness: Brightness.light).textTheme,
     ).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
 
     return base.copyWith(
@@ -51,16 +50,18 @@ class AppTheme {
     );
   }
 
-  /// Arma el theme completo, con [accent] como color principal (dorado
-  /// por defecto, o el color de un equipo si el usuario eligió uno).
-  static ThemeData build({Color accent = AppColors.gold}) {
-    final colorScheme = ColorScheme.dark(
+  /// Arma el theme completo, con [accent] como color principal (azul
+  /// marino por defecto, o el color de un equipo si el usuario eligió uno).
+  /// El fondo marrón claro y el texto oscuro NUNCA cambian — solo varía
+  /// el acento, para que siempre sea legible sin importar el equipo.
+  static ThemeData build({Color accent = AppColors.navy}) {
+    final colorScheme = ColorScheme.light(
       primary: accent,
-      onPrimary: AppColors.navyDeep,
-      secondary: AppColors.cream,
-      onSecondary: AppColors.navyDeep,
-      surface: AppColors.navy,
-      onSurface: AppColors.cream,
+      onPrimary: AppColors.cream,
+      secondary: AppColors.navyDeep,
+      onSecondary: AppColors.cream,
+      surface: AppColors.cream,
+      onSurface: AppColors.navyDeep,
       error: AppColors.error,
       onError: Colors.white,
     );
@@ -68,24 +69,24 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: AppColors.navy,
+      scaffoldBackgroundColor: AppColors.iconBrown,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.navyDeep,
-        foregroundColor: AppColors.cream,
+        backgroundColor: AppColors.iconBrown,
+        foregroundColor: AppColors.navyDeep,
         elevation: 0,
         scrolledUnderElevation: 1,
         titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: AppColors.cream,
+          color: AppColors.navyDeep,
           fontSize: 22,
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: accent,
-          foregroundColor: AppColors.navyDeep,
+          foregroundColor: AppColors.cream,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           textStyle: textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.bold,
@@ -106,11 +107,11 @@ class AppTheme {
         style: TextButton.styleFrom(foregroundColor: accent),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.navyDeep,
+        color: AppColors.cream,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: accent.withValues(alpha: 0.25)),
+          side: BorderSide(color: accent.withValues(alpha: 0.3)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -123,23 +124,26 @@ class AppTheme {
           borderSide: BorderSide(color: accent, width: 2),
         ),
         filled: true,
-        fillColor: AppColors.navyDeep,
-        labelStyle: TextStyle(color: AppColors.cream.withValues(alpha: 0.7)),
+        fillColor: AppColors.cream,
+        labelStyle: TextStyle(color: AppColors.navyDeep.withValues(alpha: 0.7)),
       ),
-      iconTheme: const IconThemeData(color: AppColors.cream),
-      dividerColor: accent.withValues(alpha: 0.2),
+      iconTheme: const IconThemeData(color: AppColors.navyDeep),
+      dividerColor: accent.withValues(alpha: 0.25),
     );
   }
 
-  /// Theme por defecto (dorado) — se usa si el usuario no eligió equipo,
-  /// o antes de que la sesión termine de cargar.
+  /// Theme por defecto (azul marino) — se usa si el usuario no eligió
+  /// equipo, o antes de que la sesión termine de cargar.
   static ThemeData get light => build();
 }
 
-/// El theme "vivo" de la app: dorado por defecto, o el color del equipo
-/// favorito del usuario logueado si eligió uno en su perfil.
+/// El theme "vivo" de la app: azul marino por defecto, o el color del
+/// equipo favorito del usuario logueado si eligió uno en su perfil. Se
+/// actualiza solo — cualquier widget que lea Theme.of(context) se
+/// redibuja apenas este provider cambia de valor, no hace falta reiniciar
+/// nada ni navegar a otra pantalla.
 final appThemeProvider = Provider<ThemeData>((ref) {
   final user = ref.watch(authControllerProvider).valueOrNull;
   final team = findLeagueTeam(user?.favoriteTeamId);
-  return AppTheme.build(accent: team?.primaryColor ?? AppColors.gold);
+  return AppTheme.build(accent: team?.primaryColor ?? AppColors.navy);
 });
