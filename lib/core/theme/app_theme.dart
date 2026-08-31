@@ -55,9 +55,14 @@ class AppTheme {
   /// El fondo marrón claro y el texto oscuro NUNCA cambian — solo varía
   /// el acento, para que siempre sea legible sin importar el equipo.
   static ThemeData build({Color accent = AppColors.navy}) {
+    // Algunos equipos tienen colores muy claros (River blanco, Aldosivi
+    // amarillo) — con texto crema fijo encima quedarían ilegibles. Se
+    // calcula el contraste según qué tan clara es la posta del color.
+    final onAccent = accent.computeLuminance() > 0.5 ? AppColors.navyDeep : AppColors.cream;
+
     final colorScheme = ColorScheme.light(
       primary: accent,
-      onPrimary: AppColors.cream,
+      onPrimary: onAccent,
       secondary: AppColors.navyDeep,
       onSecondary: AppColors.cream,
       surface: AppColors.cream,
@@ -86,13 +91,16 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: accent,
-          foregroundColor: AppColors.cream,
+          foregroundColor: onAccent,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           textStyle: textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          // Esquinas casi sin redondear — el espíritu "en bloques" del
+          // resto de la marca (ícono, logo, ribbons) en vez del look
+          // Material genérico con todo curvo.
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -100,7 +108,7 @@ class AppTheme {
           foregroundColor: accent,
           side: BorderSide(color: accent),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -110,17 +118,17 @@ class AppTheme {
         color: AppColors.cream,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(6),
           side: BorderSide(color: accent.withValues(alpha: 0.3)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(4),
           borderSide: BorderSide(color: accent.withValues(alpha: 0.4)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(4),
           borderSide: BorderSide(color: accent, width: 2),
         ),
         filled: true,

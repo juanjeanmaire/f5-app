@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../../shared/widgets/pixel_f5_logo.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../domain/group_membership.dart';
 import 'groups_controller.dart';
@@ -18,7 +19,14 @@ class GroupsListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mis grupos'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            PixelF5Logo(pixelSize: 3, shadowOffset: 1),
+            SizedBox(width: 10),
+            Text('Mis grupos'),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: 'Crear o unirme a un grupo',

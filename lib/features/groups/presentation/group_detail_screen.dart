@@ -12,6 +12,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/utils/whatsapp_share.dart';
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/elo_line_chart.dart';
+import '../../../shared/widgets/pixel_chat_icon.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../matches/domain/match.dart';
 import '../../matches/presentation/matches_controller.dart';
@@ -74,7 +75,7 @@ class GroupDetailScreen extends ConsumerWidget {
           if (inviteCode != null)
             IconButton(
               tooltip: 'Invitar por WhatsApp',
-              icon: const Icon(Icons.chat_outlined),
+              icon: const PixelChatIcon(pixelSize: 3),
               onPressed: () => _showInviteSheet(context, title, inviteCode),
             ),
           if (isCurrentUserAdmin)
@@ -449,7 +450,7 @@ class GroupDetailScreen extends ConsumerWidget {
                       ..showSnackBar(const SnackBar(content: Text('No se pudo abrir WhatsApp')));
                   }
                 },
-                icon: const Icon(Icons.chat_outlined, size: 18),
+                icon: const PixelChatIcon(pixelSize: 2.5),
                 label: const Text('Compartir por WhatsApp'),
               ),
             ],
@@ -793,24 +794,62 @@ class _VenueRibbon extends StatefulWidget {
 
 class _VenueRibbonState extends State<_VenueRibbon> {
   bool _expanded = false;
+  bool _mapLoading = false;
   WebViewController? _controller;
   String? _loadedForAddress;
 
   bool get _hasAddress => widget.venueAddress != null && widget.venueAddress!.isNotEmpty;
 
-  void _ensureController() {
+  /// Ubica la dirección primero (mismo servicio que las sugerencias del
+  /// editor) y carga el mapa minimalista de OpenStreetMap centrado ahí,
+  /// en vez de la página completa de búsqueda — así se siente parte de
+  /// la app en vez de un sitio externo con su propio menú.
+  Future<void> _loadMap() async {
     if (!_hasAddress) return;
     if (_controller != null && _loadedForAddress == widget.venueAddress) return;
-    final query = Uri.encodeComponent(widget.venueAddress!);
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse('https://www.openstreetmap.org/search?query=$query'));
-    _loadedForAddress = widget.venueAddress;
+
+    setState(() => _mapLoading = true);
+
+    final address = widget.venueAddress!;
+    String targetUrl;
+    try {
+      final dio = Dio();
+      final response = await dio.get(
+        'https://nominatim.openstreetmap.org/search',
+        queryParameters: {'q': address, 'format': 'jsonv2', 'limit': '1'},
+        options: Options(
+          headers: {'User-Agent': 'F5App/1.0 (contacto: juangjeanmaire@gmail.com)'},
+        ),
+      );
+      final results = response.data as List;
+      if (results.isNotEmpty) {
+        final first = results.first as Map<String, dynamic>;
+        final lat = double.parse(first['lat'] as String);
+        final lon = double.parse(first['lon'] as String);
+        const delta = 0.006; // recorte chico alrededor del punto (~600m)
+        final bbox = '${lon - delta},${lat - delta},${lon + delta},${lat + delta}';
+        targetUrl =
+            'https://www.openstreetmap.org/export/embed.html?bbox=$bbox&layer=mapnik&marker=$lat,$lon';
+      } else {
+        // No se pudo ubicar exacto — mostramos la búsqueda como respaldo.
+        targetUrl = 'https://www.openstreetmap.org/search?query=${Uri.encodeComponent(address)}';
+      }
+    } catch (_) {
+      targetUrl = 'https://www.openstreetmap.org/search?query=${Uri.encodeComponent(address)}';
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..loadRequest(Uri.parse(targetUrl));
+      _loadedForAddress = address;
+      _mapLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_expanded) _ensureController();
     final accent = Theme.of(context).colorScheme.primary;
 
     return Card(
@@ -825,6 +864,7 @@ class _VenueRibbonState extends State<_VenueRibbon> {
                 return;
               }
               setState(() => _expanded = !_expanded);
+              if (_expanded) _loadMap();
             },
             child: Container(
               width: double.infinity,
@@ -869,10 +909,12 @@ class _VenueRibbonState extends State<_VenueRibbon> {
               ),
             ),
           ),
-          if (_expanded && _hasAddress && _controller != null)
+          if (_expanded && _hasAddress)
             SizedBox(
               height: 240,
-              child: WebViewWidget(controller: _controller!),
+              child: _mapLoading || _controller == null
+                  ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
+                  : WebViewWidget(controller: _controller!),
             ),
         ],
       ),
