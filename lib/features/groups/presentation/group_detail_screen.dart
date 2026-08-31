@@ -141,7 +141,7 @@ class GroupDetailScreen extends ConsumerWidget {
                   Expanded(
                     child: _SquareButton(
                       icon: PixelIcons.addCircleOutline,
-                      label: 'GENERAR\nPARTIDO',
+                      label: 'CARGAR\nPARTIDO',
                       onTap: () => context.push('/groups/$groupId/matches/create'),
                     ),
                   ),
