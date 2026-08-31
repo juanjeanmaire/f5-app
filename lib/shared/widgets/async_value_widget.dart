@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
+import 'pixel_icon.dart';
 
 /// Envuelve el patrón repetido de mostrar loading/error/data para un
 /// AsyncValue, con un estilo de error consistente en toda la app.
@@ -30,7 +31,7 @@ class AsyncValueWidget<T> extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                PixelIcon(PixelIcons.errorOutline, size: 48, color: Theme.of(context).colorScheme.error),
                 const SizedBox(height: 12),
                 Text(message, textAlign: TextAlign.center),
                 if (onRetry != null) ...[

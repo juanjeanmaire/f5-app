@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../../shared/widgets/pixel_icon.dart';
 import '../domain/match.dart';
 import 'matches_controller.dart';
 import 'widgets/team_elo_summary_row.dart';
@@ -33,8 +34,8 @@ class MatchHistoryScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 120),
                     child: Column(
                       children: [
-                        Icon(
-                          Icons.event_note_outlined,
+                        PixelIcon(
+                          PixelIcons.eventNoteOutlined,
                           size: 64,
                           color: Theme.of(context).colorScheme.outline,
                         ),
@@ -63,7 +64,7 @@ class MatchHistoryScreen extends ConsumerWidget {
       floatingActionButton: isAdmin
           ? FloatingActionButton.extended(
               onPressed: () => context.push('/groups/$groupId/matches/create'),
-              icon: const Icon(Icons.add),
+              icon: const PixelIcon(PixelIcons.add, size: 20),
               label: const Text('Partido'),
             )
           : null,
@@ -151,7 +152,7 @@ class _MatchCard extends ConsumerWidget {
                     alignment: Alignment.centerRight,
                     child: TextButton.icon(
                       onPressed: () => _confirmDelete(context, ref),
-                      icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                      icon: const PixelIcon(PixelIcons.deleteOutline, size: 18, color: Colors.red),
                       label: const Text('Borrar partido', style: TextStyle(color: Colors.red)),
                     ),
                   ),

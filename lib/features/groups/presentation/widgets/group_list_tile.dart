@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/api/api_exception.dart';
+import '../../../../shared/widgets/pixel_icon.dart';
 import '../../domain/group_membership.dart';
 import '../groups_controller.dart';
 
@@ -62,8 +63,9 @@ class GroupListTile extends ConsumerWidget {
                   ],
                 )
               else
-                Icon(
-                  Icons.chevron_right,
+                PixelIcon(
+                  PixelIcons.chevronRight,
+                  size: 18,
                   color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
             ],
@@ -82,7 +84,7 @@ class GroupListTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.exit_to_app, color: Colors.red),
+              leading: const PixelIcon(PixelIcons.exitToApp, size: 20, color: Colors.red),
               title: const Text('Eliminar grupo', style: TextStyle(color: Colors.red)),
               subtitle: const Text('Salís del grupo — no lo borra para los demás'),
               onTap: () {

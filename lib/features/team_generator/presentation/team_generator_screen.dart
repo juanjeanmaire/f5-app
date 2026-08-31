@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../../shared/widgets/pixel_icon.dart';
 import '../../players/domain/player.dart';
 import '../../players/presentation/players_controller.dart';
 import '../data/team_generator_repository.dart';
@@ -120,7 +121,7 @@ class _TeamGeneratorScreenState extends ConsumerState<TeamGeneratorScreen> {
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.shuffle),
+                        : const PixelIcon(PixelIcons.shuffle, size: 20),
                     label: Text('Generar equipos (${_selected.length} seleccionados)'),
                   ),
                 ),
@@ -192,7 +193,7 @@ class _ResultSection extends StatelessWidget {
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: onLoadMatch,
-              icon: const Icon(Icons.sports_soccer),
+              icon: const PixelIcon(PixelIcons.sportsSoccer, size: 20),
               label: const Text('Cargar este partido'),
             ),
           ],

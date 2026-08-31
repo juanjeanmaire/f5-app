@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../../shared/widgets/pixel_icon.dart';
 import '../domain/player.dart';
 import 'players_controller.dart';
 
@@ -32,8 +33,8 @@ class PlayersListScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 120),
                     child: Column(
                       children: [
-                        Icon(
-                          Icons.sports_soccer,
+                        PixelIcon(
+                          PixelIcons.sportsSoccer,
                           size: 64,
                           color: Theme.of(context).colorScheme.outline,
                         ),
@@ -63,7 +64,7 @@ class PlayersListScreen extends ConsumerWidget {
       floatingActionButton: isAdmin
           ? FloatingActionButton.extended(
               onPressed: () => _showAddPlayerDialog(context, ref),
-              icon: const Icon(Icons.person_add_outlined),
+              icon: const PixelIcon(PixelIcons.personAddOutlined, size: 20),
               label: const Text('Jugador'),
             )
           : null,
@@ -107,10 +108,104 @@ class PlayersListScreen extends ConsumerWidget {
 
     Navigator.of(dialogContext).pop();
     try {
-      await ref.read(playersControllerProvider(groupId).notifier).createPlayer(name);
+      final newPlayer =
+          await ref.read(playersControllerProvider(groupId).notifier).createPlayer(name);
+      if (!screenContext.mounted) return;
+      await _offerMerge(screenContext, ref, newPlayer);
     } on ApiException catch (e) {
       if (!screenContext.mounted) return;
       ScaffoldMessenger.of(screenContext).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  /// Después de crear un jugador, le pregunta al capitán si en realidad
+  /// corresponde a alguien que ya estaba en el grupo (para no perder su
+  /// historial de partidos si se creó por accidente un perfil duplicado).
+  Future<void> _offerMerge(BuildContext context, WidgetRef ref, Player newPlayer) async {
+    final corresponds = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('¿Es un jugador que ya estaba en el grupo?'),
+        content: Text(
+          '¿"${newPlayer.name}" corresponde a alguien que ya tenía partidos '
+          'jugados en este grupo (bajo otro nombre)? Si es así, le podemos '
+          'pasar todo su historial a este perfil nuevo.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('No'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Sí'),
+          ),
+        ],
+      ),
+    );
+
+    if (corresponds != true || !context.mounted) return;
+
+    final players = ref.read(playersControllerProvider(groupId)).valueOrNull ?? [];
+    final candidates = players.where((p) => p.id != newPlayer.id).toList();
+
+    if (candidates.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No hay otros jugadores en el grupo para elegir.')),
+      );
+      return;
+    }
+
+    Player? selected;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setState) => AlertDialog(
+          title: const Text('¿Cuál es el jugador original?'),
+          content: DropdownButtonFormField<Player>(
+            initialValue: selected,
+            hint: const Text('Elegí un jugador'),
+            isExpanded: true,
+            items: candidates
+                .map(
+                  (p) => DropdownMenuItem(
+                    value: p,
+                    child: Text('${p.name} (ELO ${p.elo.round()})'),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) => setState(() => selected = value),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: selected == null
+                  ? null
+                  : () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Fusionar'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true || selected == null || !context.mounted) return;
+
+    try {
+      await ref.read(playersControllerProvider(groupId).notifier).mergePlayers(
+            keepPlayerId: newPlayer.id,
+            mergeFromPlayerId: selected!.id,
+          );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Historial de "${selected!.name}" traspasado a "${newPlayer.name}"')),
+      );
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
     }
   }
 }

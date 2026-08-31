@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/pixel_icon.dart';
+
 class MessageComposer extends StatelessWidget {
   const MessageComposer({
     super.key,
@@ -40,7 +42,7 @@ class MessageComposer extends StatelessWidget {
                       height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.send),
+                  : const PixelIcon(PixelIcons.send, size: 20),
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/pixel_f5_logo.dart';
+import '../../../shared/widgets/pixel_icon.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../domain/group_membership.dart';
 import 'groups_controller.dart';
@@ -30,7 +31,7 @@ class GroupsListScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Crear o unirme a un grupo',
-            icon: const Icon(Icons.add),
+            icon: const PixelIcon(PixelIcons.add, size: 20),
             onPressed: () => _showCreateOrJoinSheet(context),
           ),
         ],
@@ -48,8 +49,8 @@ class GroupsListScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 120),
                     child: Column(
                       children: [
-                        Icon(
-                          Icons.groups_outlined,
+                        PixelIcon(
+                          PixelIcons.groupsOutlined,
                           size: 64,
                           color: Theme.of(context).colorScheme.outline,
                         ),
@@ -87,7 +88,7 @@ class GroupsListScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.add_circle_outline),
+              leading: const PixelIcon(PixelIcons.addCircleOutline, size: 22),
               title: const Text('Crear un grupo nuevo'),
               onTap: () {
                 Navigator.of(sheetContext).pop();
@@ -95,7 +96,7 @@ class GroupsListScreen extends ConsumerWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.group_add_outlined),
+              leading: const PixelIcon(PixelIcons.groupAddOutlined, size: 22),
               title: const Text('Unirme con un código'),
               onTap: () {
                 Navigator.of(sheetContext).pop();
