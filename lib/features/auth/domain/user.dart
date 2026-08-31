@@ -5,6 +5,7 @@ class AppUser {
     required this.name,
     this.nickname,
     this.avatarUrl,
+    this.favoriteTeamId,
   });
 
   final String id;
@@ -12,6 +13,7 @@ class AppUser {
   final String name;
   final String? nickname;
   final String? avatarUrl;
+  final String? favoriteTeamId;
 
   /// "Nombre" si no tiene apodo, o 'Nombre "Apodo"' si lo tiene — se usa
   /// en toda la app donde se muestra el nombre de un usuario.
@@ -24,5 +26,6 @@ class AppUser {
         name: json['name'] as String,
         nickname: json['nickname'] as String?,
         avatarUrl: json['avatarUrl'] as String?,
+        favoriteTeamId: json['favoriteTeamId'] as String?,
       );
 }

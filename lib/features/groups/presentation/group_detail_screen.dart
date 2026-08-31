@@ -487,6 +487,7 @@ class _ActionRibbon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = Theme.of(context).colorScheme.primary;
     return Card(
       clipBehavior: Clip.antiAlias,
       margin: EdgeInsets.zero,
@@ -495,12 +496,12 @@ class _ActionRibbon extends StatelessWidget {
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          decoration: const BoxDecoration(
-            border: Border(left: BorderSide(color: AppColors.gold, width: 4)),
+          decoration: BoxDecoration(
+            border: Border(left: BorderSide(color: accent, width: 4)),
           ),
           child: Row(
             children: [
-              Icon(icon, color: AppColors.gold, size: 26),
+              Icon(icon, color: accent, size: 26),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
@@ -540,7 +541,7 @@ class _SquareButton extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 30, color: AppColors.gold),
+                Icon(icon, size: 30, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 8),
                 Text(
                   label,
@@ -585,6 +586,7 @@ class _PlayerEloRibbonState extends State<_PlayerEloRibbon> {
 
   @override
   Widget build(BuildContext context) {
+    final accent = Theme.of(context).colorScheme.primary;
     return Card(
       clipBehavior: Clip.antiAlias,
       margin: EdgeInsets.zero,
@@ -599,15 +601,15 @@ class _PlayerEloRibbonState extends State<_PlayerEloRibbon> {
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          decoration: const BoxDecoration(
-            border: Border(left: BorderSide(color: AppColors.gold, width: 4)),
+          decoration: BoxDecoration(
+            border: Border(left: BorderSide(color: accent, width: 4)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const Icon(Icons.show_chart, color: AppColors.gold, size: 26),
+                  Icon(Icons.show_chart, color: accent, size: 26),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(widget.playerLabel, style: Theme.of(context).textTheme.titleMedium),
@@ -691,6 +693,7 @@ class _VenueRibbonState extends State<_VenueRibbon> {
   @override
   Widget build(BuildContext context) {
     if (_expanded) _ensureController();
+    final accent = Theme.of(context).colorScheme.primary;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -708,12 +711,12 @@ class _VenueRibbonState extends State<_VenueRibbon> {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-              decoration: const BoxDecoration(
-                border: Border(left: BorderSide(color: AppColors.gold, width: 4)),
+              decoration: BoxDecoration(
+                border: Border(left: BorderSide(color: accent, width: 4)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.location_on_outlined, color: AppColors.gold, size: 26),
+                  Icon(Icons.location_on_outlined, color: accent, size: 26),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(

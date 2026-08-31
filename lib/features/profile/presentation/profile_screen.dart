@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
+import '../../../core/theme/league_teams.dart';
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../auth/domain/user.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -166,6 +167,17 @@ class ProfileScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _selectFavoriteTeam(BuildContext context, WidgetRef ref, String? teamId) async {
+    try {
+      final repo = ref.read(usersRepositoryProvider);
+      await repo.updateFavoriteTeam(teamId);
+      ref.invalidate(authControllerProvider);
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).valueOrNull;
@@ -225,6 +237,43 @@ class ProfileScreen extends ConsumerWidget {
                         label: const Text('Cambiar contraseña'),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 20),
+                  DropdownButtonFormField<String?>(
+                    initialValue: user?.favoriteTeamId,
+                    decoration: const InputDecoration(
+                      labelText: 'Equipo favorito',
+                      helperText: 'Cambia el color de acento de toda la app',
+                    ),
+                    isExpanded: true,
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('Sin equipo (dorado)'),
+                      ),
+                      ...argentineLeagueTeams.map(
+                        (team) => DropdownMenuItem<String?>(
+                          value: team.id,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: team.primaryColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white24),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(team.name),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) => _selectFavoriteTeam(context, ref, value),
                   ),
                 ],
               ),

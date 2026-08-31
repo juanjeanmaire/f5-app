@@ -26,6 +26,20 @@ class UsersRepository {
     }
   }
 
+  /// Separado de updateProfile a propósito: el desplegable de equipo
+  /// favorito aplica al toque, sin pasar por el diálogo de "Editar perfil".
+  Future<AppUser> updateFavoriteTeam(String? favoriteTeamId) async {
+    try {
+      final response = await _dio.patch(
+        '/users/me',
+        data: {'favoriteTeamId': favoriteTeamId},
+      );
+      return AppUser.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,

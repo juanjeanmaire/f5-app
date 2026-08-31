@@ -10,11 +10,12 @@ class F5App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final theme = ref.watch(appThemeProvider);
 
     return MaterialApp.router(
       title: 'F5 App',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
+      theme: theme,
       routerConfig: router,
     );
   }

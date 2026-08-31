@@ -41,6 +41,7 @@ class EloLineChart extends StatelessWidget {
     final maxValue = values.reduce((a, b) => a > b ? a : b);
     // Margen para que la línea no quede pegada a los bordes del gráfico.
     final padding = ((maxValue - minValue) * 0.15).clamp(10, 100).toDouble();
+    final accent = Theme.of(context).colorScheme.primary;
 
     return SizedBox(
       height: height,
@@ -71,12 +72,12 @@ class EloLineChart extends StatelessWidget {
             LineChartBarData(
               spots: spots,
               isCurved: true,
-              color: AppColors.gold,
+              color: accent,
               barWidth: compact ? 2 : 3,
               dotData: FlDotData(show: !compact),
               belowBarData: BarAreaData(
                 show: true,
-                color: AppColors.gold.withValues(alpha: 0.15),
+                color: accent.withValues(alpha: 0.15),
               ),
             ),
           ],

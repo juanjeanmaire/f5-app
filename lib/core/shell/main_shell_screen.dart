@@ -103,7 +103,9 @@ class _NavIcon extends StatelessWidget {
       icon: Icon(
         icon,
         size: size,
-        color: selected ? AppColors.gold : AppColors.cream.withValues(alpha: 0.6),
+        color: selected
+            ? Theme.of(context).colorScheme.primary
+            : AppColors.cream.withValues(alpha: 0.6),
       ),
     );
   }

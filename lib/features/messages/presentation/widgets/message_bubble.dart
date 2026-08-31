@@ -12,6 +12,7 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final accent = Theme.of(context).colorScheme.primary;
     final time = message.createdAt;
     final timeLabel =
         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
@@ -23,7 +24,7 @@ class MessageBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: isMine ? AppColors.gold : AppColors.navyDeep,
+          color: isMine ? accent : AppColors.navyDeep,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
@@ -36,7 +37,7 @@ class MessageBubble extends StatelessWidget {
                 child: Text(
                   message.senderDisplayName,
                   style: textTheme.labelSmall?.copyWith(
-                    color: AppColors.gold,
+                    color: accent,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
