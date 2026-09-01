@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../groups/presentation/group_detail_controller.dart';
 import '../../players/domain/player.dart';
 import '../../players/presentation/players_controller.dart';
 import '../domain/match.dart';
@@ -129,6 +130,9 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
   @override
   Widget build(BuildContext context) {
     final playersAsync = ref.watch(playersControllerProvider(widget.groupId));
+    final groupAsync = ref.watch(groupDetailProvider(widget.groupId));
+    final teamAName = groupAsync.valueOrNull?.displayTeamAName ?? 'A';
+    final teamBName = groupAsync.valueOrNull?.displayTeamBName ?? 'B';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Cargar partido')),
@@ -160,7 +164,7 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
                           child: TextField(
                             controller: _scoreAController,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'Goles equipo A'),
+                            decoration: InputDecoration(labelText: 'Goles $teamAName'),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -168,15 +172,15 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
                           child: TextField(
                             controller: _scoreBController,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'Goles equipo B'),
+                            decoration: InputDecoration(labelText: 'Goles $teamBName'),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Equipo A: ${_teamA.length}/${_matchType.teamSize}   '
-                      'Equipo B: ${_teamB.length}/${_matchType.teamSize}',
+                      '$teamAName: ${_teamA.length}/${_matchType.teamSize}   '
+                      '$teamBName: ${_teamB.length}/${_matchType.teamSize}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
@@ -194,19 +198,19 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
                           final inB = _teamB.contains(player.id);
 
                           return ListTile(
-                            title: Text(player.name),
+                            title: Text(player.displayName),
                             subtitle: Text('ELO ${player.elo.round()}'),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 ChoiceChip(
-                                  label: const Text('A'),
+                                  label: Text(teamAName),
                                   selected: inA,
                                   onSelected: (_) => _togglePlayer(player.id, teamA: true),
                                 ),
                                 const SizedBox(width: 8),
                                 ChoiceChip(
-                                  label: const Text('B'),
+                                  label: Text(teamBName),
                                   selected: inB,
                                   onSelected: (_) => _togglePlayer(player.id, teamA: false),
                                 ),
