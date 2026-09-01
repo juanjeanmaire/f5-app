@@ -1,0 +1,32 @@
+name: Generar carpeta iOS (una sola vez)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # No toca nada de lo que ya existe (android/, lib/, etc.) — solo
+      # rellena la carpeta ios/ que falta, con el mismo nombre de paquete
+      # que ya usa Android (com.freire.f5_app).
+      - name: Generar la carpeta ios/ que falta
+        run: flutter create --platforms=ios --org com.freire .
+
+      - name: Subir la carpeta ios/ generada al repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ios/
+          git commit -m "Generar carpeta ios/ faltante (flutter create --platforms=ios)" || echo "Nada para commitear"
+          git push
