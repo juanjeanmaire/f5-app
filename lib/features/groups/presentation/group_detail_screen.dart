@@ -139,7 +139,7 @@ class GroupDetailScreen extends ConsumerWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _SquareButton(
-                      icon: Icons.addCircleOutline,
+                      icon: Icons.add_circle_outline,
                       label: 'CARGAR\nPARTIDO',
                       onTap: () => context.push('/groups/$groupId/matches/create'),
                     ),

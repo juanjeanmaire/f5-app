@@ -87,7 +87,7 @@ class GroupsListScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.addCircleOutline, size: 22),
+              leading: const Icon(Icons.add_circle_outline, size: 22),
               title: const Text('Crear un grupo nuevo'),
               onTap: () {
                 Navigator.of(sheetContext).pop();
