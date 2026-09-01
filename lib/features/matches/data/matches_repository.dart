@@ -17,6 +17,7 @@ class MatchesRepository {
     required int scoreB,
     required List<String> teamAPlayerIds,
     required List<String> teamBPlayerIds,
+    DateTime? date,
   }) async {
     try {
       final response = await _dio.post(
@@ -27,6 +28,7 @@ class MatchesRepository {
           'scoreB': scoreB,
           'teamAPlayerIds': teamAPlayerIds,
           'teamBPlayerIds': teamBPlayerIds,
+          if (date != null) 'date': date.toIso8601String(),
         },
       );
       return Match.fromJson(response.data as Map<String, dynamic>);

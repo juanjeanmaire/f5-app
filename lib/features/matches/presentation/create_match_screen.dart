@@ -34,6 +34,7 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
   final Set<String> _teamB = {};
   final _scoreAController = TextEditingController(text: '0');
   final _scoreBController = TextEditingController(text: '0');
+  DateTime _date = DateTime.now();
   bool _submitting = false;
 
   @override
@@ -90,6 +91,17 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
     });
   }
 
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      // Desde hoy para atrás — no se puede cargar un partido con fecha futura.
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) setState(() => _date = picked);
+  }
+
   Future<void> _submit() async {
     final requiredSize = _matchType.teamSize;
     if (_teamA.length != requiredSize || _teamB.length != requiredSize) {
@@ -116,6 +128,7 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
             scoreB: scoreB,
             teamAPlayerIds: _teamA.toList(),
             teamBPlayerIds: _teamB.toList(),
+            date: _date,
           );
       if (!mounted) return;
       context.pop();
@@ -156,6 +169,15 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
                           .toList(),
                       selected: {_matchType},
                       onSelectionChanged: (selection) => _onMatchTypeChanged(selection.first),
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: _pickDate,
+                      icon: const Icon(Icons.calendar_today_outlined, size: 18),
+                      label: Text(
+                        'Fecha del partido: ${_date.day.toString().padLeft(2, '0')}/'
+                        '${_date.month.toString().padLeft(2, '0')}/${_date.year}',
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Row(

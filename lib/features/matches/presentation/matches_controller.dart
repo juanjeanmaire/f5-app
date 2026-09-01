@@ -27,6 +27,7 @@ class MatchesController extends FamilyAsyncNotifier<List<Match>, String> {
     required int scoreB,
     required List<String> teamAPlayerIds,
     required List<String> teamBPlayerIds,
+    DateTime? date,
   }) async {
     final match = await _repo.createMatch(
       groupId: _groupId,
@@ -35,6 +36,7 @@ class MatchesController extends FamilyAsyncNotifier<List<Match>, String> {
       scoreB: scoreB,
       teamAPlayerIds: teamAPlayerIds,
       teamBPlayerIds: teamBPlayerIds,
+      date: date,
     );
     await refresh();
     return match;
