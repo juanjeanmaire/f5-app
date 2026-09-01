@@ -232,10 +232,10 @@ class _PlayerTile extends ConsumerWidget {
         child: ListTile(
           onTap: () => context.push(
             '/groups/$groupId/players/${player.id}/matches',
-            extra: player.name,
+            extra: player.displayName,
           ),
           leading: CircleAvatar(child: Text('$rank')),
-          title: Text(player.name),
+          title: Text(player.displayName),
           subtitle: Text(
             'ELO ${player.elo.round()} · ${player.matchesPlayed} '
             '${player.matchesPlayed == 1 ? 'partido' : 'partidos'}'

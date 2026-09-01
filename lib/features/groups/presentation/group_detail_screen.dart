@@ -115,14 +115,14 @@ class GroupDetailScreen extends ConsumerWidget {
                 ),
               ),
             _PlayerEloRibbon(
-              playerLabel: myPlayer?.name ?? currentUser?.displayName ?? 'Vos',
+              playerLabel: myPlayer?.displayName ?? currentUser?.displayName ?? 'Vos',
               hasPlayer: myPlayer != null,
               eloProgression: eloProgression,
               onNavigate: () {
                 if (myPlayer != null) {
                   context.push(
                     '/groups/$groupId/players/${myPlayer.id}/matches',
-                    extra: myPlayer.name,
+                    extra: myPlayer.displayName,
                   );
                 } else {
                   context.push('/groups/$groupId/players', extra: isCurrentUserAdmin);

@@ -5,9 +5,16 @@ import '../../domain/match.dart';
 /// Muestra, para un partido, el ELO promedio de cada equipo (el nivel con
 /// el que se enfrentaron) y cuántos puntos ganó/perdió cada uno en promedio.
 class TeamEloSummaryRow extends StatelessWidget {
-  const TeamEloSummaryRow({super.key, required this.match});
+  const TeamEloSummaryRow({
+    super.key,
+    required this.match,
+    this.teamAName = 'Equipo A',
+    this.teamBName = 'Equipo B',
+  });
 
   final Match match;
+  final String teamAName;
+  final String teamBName;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +22,7 @@ class TeamEloSummaryRow extends StatelessWidget {
       children: [
         Expanded(
           child: _TeamBadge(
-            label: 'Equipo A',
+            label: teamAName,
             avgElo: match.avgEloTeamA,
             avgDelta: match.avgDeltaTeamA,
           ),
@@ -23,7 +30,7 @@ class TeamEloSummaryRow extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _TeamBadge(
-            label: 'Equipo B',
+            label: teamBName,
             avgElo: match.avgEloTeamB,
             avgDelta: match.avgDeltaTeamB,
           ),

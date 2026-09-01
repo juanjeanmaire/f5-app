@@ -79,6 +79,8 @@ class Match {
     required this.teamPlayers,
     this.location,
     this.groupName,
+    this.groupTeamAName,
+    this.groupTeamBName,
   });
 
   final String id;
@@ -90,10 +92,17 @@ class Match {
   final int scoreB;
   final List<MatchTeamPlayer> teamPlayers;
 
-  /// Solo viene poblado en GET /matches/mine (el backend hace
+  /// Solo vienen poblados en GET /matches/mine (el backend hace
   /// include: { group: true } ahí) — en los endpoints scoped a un grupo
   /// puntual no hace falta, ya se sabe en qué grupo se está.
   final String? groupName;
+  final String? groupTeamAName;
+  final String? groupTeamBName;
+
+  String get displayTeamAName =>
+      groupTeamAName?.isNotEmpty == true ? groupTeamAName! : 'Equipo A';
+  String get displayTeamBName =>
+      groupTeamBName?.isNotEmpty == true ? groupTeamBName! : 'Equipo B';
 
   List<MatchTeamPlayer> get teamA =>
       teamPlayers.where((p) => p.team == TeamSide.a).toList();
@@ -127,6 +136,8 @@ class Match {
             .map((e) => MatchTeamPlayer.fromJson(e as Map<String, dynamic>))
             .toList(),
         groupName: (json['group'] as Map<String, dynamic>?)?['name'] as String?,
+        groupTeamAName: (json['group'] as Map<String, dynamic>?)?['teamAName'] as String?,
+        groupTeamBName: (json['group'] as Map<String, dynamic>?)?['teamBName'] as String?,
       );
 }
 

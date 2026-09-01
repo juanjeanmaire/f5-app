@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../groups/presentation/group_detail_controller.dart';
 import '../domain/match.dart';
 import 'matches_controller.dart';
 import 'widgets/team_elo_summary_row.dart';
@@ -17,6 +18,9 @@ class MatchHistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final matchesAsync = ref.watch(matchesControllerProvider(groupId));
+    final groupAsync = ref.watch(groupDetailProvider(groupId));
+    final teamAName = groupAsync.valueOrNull?.displayTeamAName ?? 'A';
+    final teamBName = groupAsync.valueOrNull?.displayTeamBName ?? 'B';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Partidos')),
@@ -55,6 +59,8 @@ class MatchHistoryScreen extends ConsumerWidget {
                 match: matches[index],
                 groupId: groupId,
                 isAdmin: isAdmin,
+                teamAName: teamAName,
+                teamBName: teamBName,
               ),
             );
           },
@@ -72,11 +78,19 @@ class MatchHistoryScreen extends ConsumerWidget {
 }
 
 class _MatchCard extends ConsumerWidget {
-  const _MatchCard({required this.match, required this.groupId, required this.isAdmin});
+  const _MatchCard({
+    required this.match,
+    required this.groupId,
+    required this.isAdmin,
+    required this.teamAName,
+    required this.teamBName,
+  });
 
   final Match match;
   final String groupId;
   final bool isAdmin;
+  final String teamAName;
+  final String teamBName;
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -127,7 +141,7 @@ class _MatchCard extends ConsumerWidget {
             children: [
               Text('Resultado: ${match.scoreA} - ${match.scoreB}'),
               const SizedBox(height: 4),
-              TeamEloSummaryRow(match: match),
+              TeamEloSummaryRow(match: match, teamAName: teamAName, teamBName: teamBName),
             ],
           ),
         ),
@@ -140,9 +154,9 @@ class _MatchCard extends ConsumerWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: _TeamColumn(title: 'Equipo A', players: match.teamA)),
+                    Expanded(child: _TeamColumn(title: teamAName, players: match.teamA)),
                     const SizedBox(width: 16),
-                    Expanded(child: _TeamColumn(title: 'Equipo B', players: match.teamB)),
+                    Expanded(child: _TeamColumn(title: teamBName, players: match.teamB)),
                   ],
                 ),
                 if (isAdmin) ...[

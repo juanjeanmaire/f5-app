@@ -89,7 +89,7 @@ class _MyMatchCard extends StatelessWidget {
               Text('${match.matchType.label} · $dateLabel'),
               Text('Resultado: ${match.scoreA} - ${match.scoreB}'),
               const SizedBox(height: 4),
-              TeamEloSummaryRow(match: match),
+              TeamEloSummaryRow(match: match, teamAName: match.displayTeamAName, teamBName: match.displayTeamBName),
             ],
           ),
         ),
@@ -105,9 +105,9 @@ class _MyMatchCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _TeamColumn(title: 'Equipo A', players: match.teamA)),
+                Expanded(child: _TeamColumn(title: match.displayTeamAName, players: match.teamA)),
                 const SizedBox(width: 16),
-                Expanded(child: _TeamColumn(title: 'Equipo B', players: match.teamB)),
+                Expanded(child: _TeamColumn(title: match.displayTeamBName, players: match.teamB)),
               ],
             ),
           ),

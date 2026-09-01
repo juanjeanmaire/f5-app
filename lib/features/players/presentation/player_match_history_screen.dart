@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/elo_line_chart.dart';
+import '../../groups/presentation/group_detail_controller.dart';
 import '../../matches/domain/match.dart';
 import '../../matches/presentation/matches_controller.dart';
 import '../../matches/presentation/widgets/team_elo_summary_row.dart';
@@ -35,9 +36,10 @@ class PlayerMatchHistoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final matchesAsync = ref.watch(matchesControllerProvider(groupId));
     final playersAsync = ref.watch(playersControllerProvider(groupId));
+    final groupAsync = ref.watch(groupDetailProvider(groupId));
 
     final player = _findPlayer(playersAsync.valueOrNull, playerId);
-    final title = player?.name ?? playerName ?? 'Jugador';
+    final title = player?.displayName ?? playerName ?? 'Jugador';
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
@@ -78,7 +80,12 @@ class PlayerMatchHistoryScreen extends ConsumerWidget {
                     ),
                   )
                 else
-                  ...matches.map((m) => _PlayerMatchTile(match: m, playerId: playerId)),
+                  ...matches.map((m) => _PlayerMatchTile(
+                        match: m,
+                        playerId: playerId,
+                        teamAName: groupAsync.valueOrNull?.displayTeamAName ?? 'A',
+                        teamBName: groupAsync.valueOrNull?.displayTeamBName ?? 'B',
+                      )),
               ],
             );
           },
@@ -110,7 +117,7 @@ class _PlayerSummaryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(player.name, style: Theme.of(context).textTheme.titleMedium),
+                  Text(player.displayName, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
                   Text(
                     'ELO actual: ${player.elo.round()} · $matchCount '
@@ -127,10 +134,17 @@ class _PlayerSummaryCard extends StatelessWidget {
 }
 
 class _PlayerMatchTile extends StatelessWidget {
-  const _PlayerMatchTile({required this.match, required this.playerId});
+  const _PlayerMatchTile({
+    required this.match,
+    required this.playerId,
+    required this.teamAName,
+    required this.teamBName,
+  });
 
   final Match match;
   final String playerId;
+  final String teamAName;
+  final String teamBName;
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +152,7 @@ class _PlayerMatchTile extends StatelessWidget {
     final d = match.date;
     final dateLabel =
         '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-    final teamLabel = entry.team == TeamSide.a ? 'Equipo A' : 'Equipo B';
+    final teamLabel = entry.team == TeamSide.a ? teamAName : teamBName;
     final deltaColor = entry.eloDelta >= 0 ? Colors.green.shade700 : Colors.red.shade700;
 
     return Card(
@@ -152,7 +166,7 @@ class _PlayerMatchTile extends StatelessWidget {
             children: [
               Text('$teamLabel · Resultado ${match.scoreA} - ${match.scoreB}'),
               const SizedBox(height: 4),
-              TeamEloSummaryRow(match: match),
+              TeamEloSummaryRow(match: match, teamAName: teamAName, teamBName: teamBName),
             ],
           ),
         ),

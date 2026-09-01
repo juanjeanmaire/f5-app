@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../groups/presentation/group_detail_controller.dart';
 import '../../players/domain/player.dart';
 import '../../players/presentation/players_controller.dart';
 import '../data/team_generator_repository.dart';
@@ -65,6 +66,7 @@ class _TeamGeneratorScreenState extends ConsumerState<TeamGeneratorScreen> {
   @override
   Widget build(BuildContext context) {
     final playersAsync = ref.watch(playersControllerProvider(widget.groupId));
+    final groupAsync = ref.watch(groupDetailProvider(widget.groupId));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Armar equipos')),
@@ -130,6 +132,8 @@ class _TeamGeneratorScreenState extends ConsumerState<TeamGeneratorScreen> {
                   result: _result!,
                   isAdmin: widget.isAdmin,
                   onLoadMatch: _loadMatchWithResult,
+                  teamAName: groupAsync.valueOrNull?.displayTeamAName ?? 'A',
+                  teamBName: groupAsync.valueOrNull?.displayTeamBName ?? 'B',
                 ),
             ],
           );
@@ -144,11 +148,15 @@ class _ResultSection extends StatelessWidget {
     required this.result,
     required this.isAdmin,
     required this.onLoadMatch,
+    required this.teamAName,
+    required this.teamBName,
   });
 
   final TeamGenerationResult result;
   final bool isAdmin;
   final VoidCallback onLoadMatch;
+  final String teamAName;
+  final String teamBName;
 
   @override
   Widget build(BuildContext context) {
@@ -173,7 +181,7 @@ class _ResultSection extends StatelessWidget {
             children: [
               Expanded(
                 child: _TeamResultColumn(
-                  title: 'Equipo A',
+                  title: teamAName,
                   sumElo: result.sumEloA,
                   players: result.teamA,
                 ),
@@ -181,7 +189,7 @@ class _ResultSection extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: _TeamResultColumn(
-                  title: 'Equipo B',
+                  title: teamBName,
                   sumElo: result.sumEloB,
                   players: result.teamB,
                 ),
