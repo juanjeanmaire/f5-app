@@ -63,6 +63,24 @@ class GroupsRepository {
     }
   }
 
+  /// Solo el capitán puede editar los nombres de los equipos (por defecto
+  /// "A"/"B" — puede ponerles otros, ej. "Blanco"/"Negro").
+  Future<Group> updateTeamNames(
+    String groupId, {
+    required String teamAName,
+    required String teamBName,
+  }) async {
+    try {
+      final response = await _dio.patch(
+        '/groups/$groupId',
+        data: {'teamAName': teamAName, 'teamBName': teamBName},
+      );
+      return Group.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
   Future<List<GroupMembership>> listMyGroups() async {
     try {
       final response = await _dio.get('/groups/mine');

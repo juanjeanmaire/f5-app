@@ -14,6 +14,8 @@ import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/elo_line_chart.dart';
 import '../../../shared/widgets/pixel_chat_icon.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../match_calls/domain/match_call.dart';
+import '../../match_calls/presentation/match_calls_controller.dart';
 import '../../matches/domain/match.dart';
 import '../../matches/presentation/matches_controller.dart';
 import '../../players/domain/player.dart';
@@ -45,6 +47,7 @@ class GroupDetailScreen extends ConsumerWidget {
     final membersAsync = ref.watch(groupMembersProvider(groupId));
     final playersAsync = ref.watch(playersControllerProvider(groupId));
     final matchesAsync = ref.watch(matchesControllerProvider(groupId));
+    final activeCallAsync = ref.watch(activeMatchCallProvider(groupId));
     final currentUser = ref.watch(authControllerProvider).valueOrNull;
 
     final title = groupAsync.valueOrNull?.name ?? initialGroup?.name ?? 'Grupo';
@@ -80,9 +83,19 @@ class GroupDetailScreen extends ConsumerWidget {
             ),
           if (isCurrentUserAdmin)
             IconButton(
-              tooltip: 'Editar nombre del grupo',
+              tooltip: 'Configuración del grupo',
               icon: const Icon(Icons.edit_outlined, size: 20),
-              onPressed: () => _editGroupName(context, ref, title),
+              onPressed: () => _editGroupSettings(
+                context,
+                ref,
+                currentName: title,
+                currentTeamAName: groupAsync.valueOrNull?.displayTeamAName ??
+                    initialGroup?.displayTeamAName ??
+                    'A',
+                currentTeamBName: groupAsync.valueOrNull?.displayTeamBName ??
+                    initialGroup?.displayTeamBName ??
+                    'B',
+              ),
             ),
         ],
       ),
@@ -94,6 +107,13 @@ class GroupDetailScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (activeCallAsync.valueOrNull != null)
+              _MatchCallBanner(
+                call: activeCallAsync.valueOrNull!,
+                onTap: () => context.push(
+                  '/groups/$groupId/match-calls/${activeCallAsync.valueOrNull!.id}',
+                ),
+              ),
             _PlayerEloRibbon(
               playerLabel: myPlayer?.name ?? currentUser?.displayName ?? 'Vos',
               hasPlayer: myPlayer != null,
@@ -127,13 +147,11 @@ class GroupDetailScreen extends ConsumerWidget {
                     child: _SquareButton(
                       icon: Icons.campaign_outlined,
                       label: 'REALIZAR UNA\nCONVOCATORIA',
-                      onTap: () {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(
-                            const SnackBar(content: Text('Todavía no está disponible')),
-                          );
-                      },
+                      disabled: activeCallAsync.valueOrNull != null,
+                      onTap: () => context.push(
+                        '/groups/$groupId/match-calls/create',
+                        extra: groupAsync.valueOrNull?.venueAddress ?? initialGroup?.venueAddress,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -349,31 +367,86 @@ class GroupDetailScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _editGroupName(BuildContext context, WidgetRef ref, String currentName) async {
-    final controller = TextEditingController(text: currentName);
-    final newName = await showDialog<String>(
+  Future<void> _editGroupSettings(
+    BuildContext context,
+    WidgetRef ref, {
+    required String currentName,
+    required String currentTeamAName,
+    required String currentTeamBName,
+  }) async {
+    final nameController = TextEditingController(text: currentName);
+    final teamAController = TextEditingController(text: currentTeamAName);
+    final teamBController = TextEditingController(text: currentTeamBName);
+
+    final saved = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Nombre del grupo'),
-        content: TextField(controller: controller, autofocus: true),
+        title: const Text('Configuración del grupo'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: 'Nombre del grupo'),
+              ),
+              const SizedBox(height: 16),
+              Text('Nombres de los equipos', style: Theme.of(dialogContext).textTheme.labelLarge),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: teamAController,
+                      decoration: const InputDecoration(labelText: 'Equipo A'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: teamBController,
+                      decoration: const InputDecoration(labelText: 'Equipo B'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text('Cancelar'),
           ),
           FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             child: const Text('Guardar'),
           ),
         ],
       ),
     );
 
-    if (newName == null || newName.isEmpty || newName == currentName) return;
+    if (saved != true) return;
+
+    final newName = nameController.text.trim();
+    final newTeamA = teamAController.text.trim();
+    final newTeamB = teamBController.text.trim();
 
     try {
       final repo = ref.read(groupsRepositoryProvider);
-      await repo.updateGroupName(groupId, newName);
+      if (newName.isNotEmpty && newName != currentName) {
+        await repo.updateGroupName(groupId, newName);
+      }
+      if ((newTeamA.isNotEmpty && newTeamA != currentTeamAName) ||
+          (newTeamB.isNotEmpty && newTeamB != currentTeamBName)) {
+        await repo.updateTeamNames(
+          groupId,
+          teamAName: newTeamA.isNotEmpty ? newTeamA : currentTeamAName,
+          teamBName: newTeamB.isNotEmpty ? newTeamB : currentTeamBName,
+        );
+      }
       ref.invalidate(groupDetailProvider(groupId));
     } on ApiException catch (e) {
       if (!context.mounted) return;
@@ -461,6 +534,62 @@ class GroupDetailScreen extends ConsumerWidget {
   }
 }
 
+/// Banner arriba de todo cuando hay una convocatoria abierta o recién
+/// cerrada (con los equipos ya armados). Lleva a la misma pantalla a la
+/// que llevaría una notificación (cuando las tengamos).
+class _MatchCallBanner extends StatelessWidget {
+  const _MatchCallBanner({required this.call, required this.onTap});
+
+  final MatchCall call;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isOpen = call.status == MatchCallStatus.open;
+    final accent = Theme.of(context).colorScheme.primary;
+    final d = call.date;
+    final dateLabel = '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')} · '
+        '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      color: isOpen ? accent.withValues(alpha: 0.15) : null,
+      margin: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(isOpen ? Icons.campaign : Icons.event_available, color: accent, size: 28),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isOpen ? 'Convocatoria abierta' : 'Convocatoria cerrada — equipos armados',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 2),
+                    Text('${call.matchType.label} · $dateLabel'),
+                    if (isOpen)
+                      Text(
+                        '${call.goingCount} / ${call.quota} confirmados',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ActionRibbon extends StatelessWidget {
   const _ActionRibbon({required this.icon, required this.label, required this.onTap});
 
@@ -506,31 +635,44 @@ class _ActionRibbon extends StatelessWidget {
 }
 
 class _SquareButton extends StatelessWidget {
-  const _SquareButton({required this.icon, required this.label, required this.onTap});
+  const _SquareButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.disabled = false,
+  });
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
+    final color = disabled
+        ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35)
+        : Theme.of(context).colorScheme.primary;
+
     return AspectRatio(
       aspectRatio: 1.3,
       child: Card(
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: onTap,
+          onTap: disabled ? null : onTap,
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 30, color: Theme.of(context).colorScheme.primary),
+                Icon(icon, size: 30, color: color),
                 const SizedBox(height: 8),
                 Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontSize: 13, color: disabled ? color : null),
                 ),
               ],
             ),

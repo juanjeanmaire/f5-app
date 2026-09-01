@@ -11,6 +11,8 @@ import '../../features/groups/presentation/group_detail_screen.dart';
 import '../../features/groups/presentation/join_group_screen.dart';
 import '../../features/matches/presentation/create_match_screen.dart';
 import '../../features/matches/presentation/match_history_screen.dart';
+import '../../features/match_calls/presentation/create_match_call_screen.dart';
+import '../../features/match_calls/presentation/match_call_detail_screen.dart';
 import '../../features/messages/presentation/captain_conversation_screen.dart';
 import '../../features/messages/presentation/captain_inbox_screen.dart';
 import '../../features/messages/presentation/member_chat_screen.dart';
@@ -117,6 +119,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => EloConfigScreen(
           groupId: state.pathParameters['groupId']!,
           isAdmin: state.extra as bool? ?? false,
+        ),
+      ),
+      GoRoute(
+        path: '/groups/:groupId/match-calls/create',
+        builder: (context, state) => CreateMatchCallScreen(
+          groupId: state.pathParameters['groupId']!,
+          groupVenueAddress: state.extra as String?,
+        ),
+      ),
+      GoRoute(
+        path: '/groups/:groupId/match-calls/:callId',
+        builder: (context, state) => MatchCallDetailScreen(
+          groupId: state.pathParameters['groupId']!,
+          callId: state.pathParameters['callId']!,
         ),
       ),
       GoRoute(

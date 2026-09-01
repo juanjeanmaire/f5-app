@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/api/api_exception.dart';
+import '../../../match_calls/domain/match_call.dart';
 import '../../domain/group_membership.dart';
 import '../groups_controller.dart';
 
@@ -41,6 +42,35 @@ class GroupListTile extends ConsumerWidget {
                         child: Text(
                           'Capitán: $captainDisplay',
                           style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    if (membership.activeMatchCall != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: InkWell(
+                          onTap: () => context.push(
+                            '/groups/${group.id}/match-calls/${membership.activeMatchCall!.id}',
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.campaign,
+                                size: 14,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                membership.activeMatchCall!.status == MatchCallStatus.open
+                                    ? 'Convocatoria abierta'
+                                    : 'Convocatoria cerrada',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                   ],

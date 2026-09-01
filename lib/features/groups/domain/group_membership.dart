@@ -1,4 +1,5 @@
 import '../../../shared/utils/display_name.dart';
+import '../../match_calls/domain/match_call.dart';
 import 'group.dart';
 
 /// En la UI mostramos "Capitán" en vez de "Admin" (ver nota en el
@@ -58,6 +59,7 @@ class GroupMembership {
     this.captainName,
     this.captainNickname,
     this.myElo,
+    this.activeMatchCall,
   });
 
   final String userId;
@@ -68,6 +70,11 @@ class GroupMembership {
   final String? captainName;
   final String? captainNickname;
   final double? myElo;
+
+  /// Solo viene poblado desde GET /groups/mine — la convocatoria abierta
+  /// (o recién cerrada) de este grupo, si hay alguna, para el indicador
+  /// en el ribbon de "mis grupos" en la home.
+  final MatchCall? activeMatchCall;
 
   String? get captainDisplayName =>
       captainName != null ? formatDisplayName(captainName!, captainNickname) : null;
@@ -85,5 +92,8 @@ class GroupMembership {
         captainName: json['captainName'] as String?,
         captainNickname: json['captainNickname'] as String?,
         myElo: (json['myElo'] as num?)?.toDouble(),
+        activeMatchCall: json['activeMatchCall'] != null
+            ? MatchCall.fromJson(json['activeMatchCall'] as Map<String, dynamic>)
+            : null,
       );
 }
