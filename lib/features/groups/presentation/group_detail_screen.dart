@@ -14,6 +14,7 @@ import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/elo_line_chart.dart';
 import '../../../shared/widgets/pixel_chat_icon.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../match_calls/data/match_calls_repository.dart';
 import '../../match_calls/domain/match_call.dart';
 import '../../match_calls/presentation/match_calls_controller.dart';
 import '../../matches/domain/match.dart';
@@ -25,6 +26,7 @@ import '../data/groups_repository.dart';
 import '../domain/group.dart';
 import '../domain/group_membership.dart';
 import 'group_detail_controller.dart';
+import 'groups_controller.dart';
 
 /// Últimos N valores de una lista (para "últimos 20 partidos"). Si hay
 /// menos, devuelve todos.
@@ -113,6 +115,10 @@ class GroupDetailScreen extends ConsumerWidget {
                 onTap: () => context.push(
                   '/groups/$groupId/match-calls/${activeCallAsync.valueOrNull!.id}',
                 ),
+                onLongPress: (isCurrentUserAdmin &&
+                        activeCallAsync.valueOrNull!.status == MatchCallStatus.open)
+                    ? () => _showMatchCallOptions(context, ref, activeCallAsync.valueOrNull!.id)
+                    : null,
               ),
             _PlayerEloRibbon(
               playerLabel: myPlayer?.displayName ?? currentUser?.displayName ?? 'Vos',
@@ -454,6 +460,66 @@ class GroupDetailScreen extends ConsumerWidget {
     }
   }
 
+  /// Menú chico al mantener apretado el banner — hoy solo tiene la
+  /// opción de cancelar, pero queda armado para agregar más si hace falta.
+  Future<void> _showMatchCallOptions(BuildContext context, WidgetRef ref, String callId) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.cancel_outlined, color: Colors.red),
+              title: const Text('Cancelar convocatoria', style: TextStyle(color: Colors.red)),
+              subtitle: const Text('Se borra — se puede lanzar otra al toque'),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                _confirmCancelMatchCall(context, ref, callId);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmCancelMatchCall(BuildContext context, WidgetRef ref, String callId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('¿Cancelar la convocatoria?'),
+        content: const Text(
+          'Los jugadores que ya confirmaron van a dejar de verla. El botón de '
+          '"Realizar una convocatoria" queda disponible de nuevo al toque.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Volver'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Cancelar convocatoria'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final repo = ref.read(matchCallsRepositoryProvider);
+      await repo.cancel(groupId, callId);
+      ref.invalidate(activeMatchCallProvider(groupId));
+      ref.invalidate(groupsControllerProvider); // refresca el indicador del home
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   Future<void> _editVenue(BuildContext context, WidgetRef ref, String? currentAddress) async {
     final newAddress = await showDialog<String>(
       context: context,
@@ -538,10 +604,11 @@ class GroupDetailScreen extends ConsumerWidget {
 /// cerrada (con los equipos ya armados). Lleva a la misma pantalla a la
 /// que llevaría una notificación (cuando las tengamos).
 class _MatchCallBanner extends StatelessWidget {
-  const _MatchCallBanner({required this.call, required this.onTap});
+  const _MatchCallBanner({required this.call, required this.onTap, this.onLongPress});
 
   final MatchCall call;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -557,6 +624,7 @@ class _MatchCallBanner extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -582,6 +650,15 @@ class _MatchCallBanner extends StatelessWidget {
                 ),
               ),
               const Icon(Icons.chevron_right),
+              if (onLongPress != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Icon(
+                    Icons.more_vert,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
             ],
           ),
         ),
