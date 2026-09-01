@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/pixel_f5_logo.dart';
-import '../../../shared/widgets/pixel_icon.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../domain/group_membership.dart';
 import 'groups_controller.dart';
@@ -31,7 +30,7 @@ class GroupsListScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Crear o unirme a un grupo',
-            icon: const PixelIcon(PixelIcons.add, size: 20),
+            icon: const Icon(Icons.add, size: 20),
             onPressed: () => _showCreateOrJoinSheet(context),
           ),
         ],
@@ -49,8 +48,8 @@ class GroupsListScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 120),
                     child: Column(
                       children: [
-                        PixelIcon(
-                          PixelIcons.groupsOutlined,
+                        Icon(
+                          Icons.groups_outlined,
                           size: 64,
                           color: Theme.of(context).colorScheme.outline,
                         ),
@@ -88,7 +87,7 @@ class GroupsListScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const PixelIcon(PixelIcons.addCircleOutline, size: 22),
+              leading: const Icon(Icons.addCircleOutline, size: 22),
               title: const Text('Crear un grupo nuevo'),
               onTap: () {
                 Navigator.of(sheetContext).pop();
@@ -96,7 +95,7 @@ class GroupsListScreen extends ConsumerWidget {
               },
             ),
             ListTile(
-              leading: const PixelIcon(PixelIcons.groupAddOutlined, size: 22),
+              leading: const Icon(Icons.group_add_outlined, size: 22),
               title: const Text('Unirme con un código'),
               onTap: () {
                 Navigator.of(sheetContext).pop();

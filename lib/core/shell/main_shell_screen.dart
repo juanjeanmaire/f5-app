@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../features/groups/presentation/groups_list_screen.dart';
 import '../../features/matches/presentation/my_matches_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
-import '../../shared/widgets/pixel_icon.dart';
 import '../theme/app_theme.dart';
 
 /// Shell con la barra de navegación inferior (perfil / mis partidos / home),
@@ -56,19 +55,19 @@ class _BottomNavBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _NavIcon(
-              icon: PixelIcons.personOutline,
+              icon: Icons.person_outline,
               tooltip: 'Mi perfil',
               selected: selectedIndex == 0,
               onTap: () => onSelect(0),
             ),
             _NavIcon(
-              icon: PixelIcons.schedule,
+              icon: Icons.schedule,
               tooltip: 'Mis partidos',
               selected: selectedIndex == 1,
               onTap: () => onSelect(1),
             ),
             _NavIcon(
-              icon: PixelIcons.homeFilled,
+              icon: Icons.home_filled,
               tooltip: 'Inicio',
               selected: selectedIndex == 2,
               onTap: () => onSelect(2),
@@ -90,7 +89,7 @@ class _NavIcon extends StatelessWidget {
     this.size = 26,
   });
 
-  final List<List<int>> icon;
+  final IconData icon;
   final String tooltip;
   final bool selected;
   final VoidCallback onTap;
@@ -101,7 +100,7 @@ class _NavIcon extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       onPressed: onTap,
-      icon: PixelIcon(
+      icon: Icon(
         icon,
         size: size,
         color: selected

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/widgets/async_value_widget.dart';
-import '../../../shared/widgets/pixel_icon.dart';
 import '../domain/message.dart';
 import 'messages_controller.dart';
 
@@ -55,7 +54,7 @@ class CaptainInboxScreen extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    trailing: const PixelIcon(PixelIcons.chevronRight, size: 18),
+                    trailing: const Icon(Icons.chevron_right, size: 18),
                     onTap: () => context.push(
                       '/groups/$groupId/inbox/${thread.memberId}',
                       extra: thread.memberDisplayName,

@@ -12,7 +12,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/utils/whatsapp_share.dart';
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/elo_line_chart.dart';
-import '../../../shared/widgets/pixel_icon.dart';
 import '../../../shared/widgets/pixel_chat_icon.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../matches/domain/match.dart';
@@ -82,7 +81,7 @@ class GroupDetailScreen extends ConsumerWidget {
           if (isCurrentUserAdmin)
             IconButton(
               tooltip: 'Editar nombre del grupo',
-              icon: const PixelIcon(PixelIcons.editOutlined, size: 20),
+              icon: const Icon(Icons.edit_outlined, size: 20),
               onPressed: () => _editGroupName(context, ref, title),
             ),
         ],
@@ -126,7 +125,7 @@ class GroupDetailScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: _SquareButton(
-                      icon: PixelIcons.campaignOutlined,
+                      icon: Icons.campaign_outlined,
                       label: 'REALIZAR UNA\nCONVOCATORIA',
                       onTap: () {
                         ScaffoldMessenger.of(context)
@@ -140,7 +139,7 @@ class GroupDetailScreen extends ConsumerWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _SquareButton(
-                      icon: PixelIcons.addCircleOutline,
+                      icon: Icons.addCircleOutline,
                       label: 'CARGAR\nPARTIDO',
                       onTap: () => context.push('/groups/$groupId/matches/create'),
                     ),
@@ -150,19 +149,19 @@ class GroupDetailScreen extends ConsumerWidget {
             ],
             const SizedBox(height: 10),
             _ActionRibbon(
-              icon: PixelIcons.eventNoteOutlined,
+              icon: Icons.event_note_outlined,
               label: 'HISTORIAL DE PARTIDOS',
               onTap: () => context.push('/groups/$groupId/matches', extra: isCurrentUserAdmin),
             ),
             const SizedBox(height: 10),
             _ActionRibbon(
-              icon: PixelIcons.sportsSoccer,
+              icon: Icons.sports_soccer_outlined,
               label: 'JUGADORES',
               onTap: () => context.push('/groups/$groupId/players', extra: isCurrentUserAdmin),
             ),
             const SizedBox(height: 10),
             _ActionRibbon(
-              icon: PixelIcons.shuffle,
+              icon: Icons.shuffle,
               label: 'ARMAR EQUIPOS',
               onTap: () => context.push('/groups/$groupId/team-generator', extra: isCurrentUserAdmin),
             ),
@@ -171,7 +170,7 @@ class GroupDetailScreen extends ConsumerWidget {
             if (isCurrentUserAdmin) ...[
               const SizedBox(height: 10),
               _ActionRibbon(
-                icon: PixelIcons.tune,
+                icon: Icons.tune,
                 label: 'CONFIGURACIÓN DE ELO',
                 onTap: () => context.push('/groups/$groupId/elo-config', extra: isCurrentUserAdmin),
               ),
@@ -212,7 +211,7 @@ class GroupDetailScreen extends ConsumerWidget {
                           title: Text(m.user?.displayName ?? m.userId),
                           subtitle: Text(m.role.label),
                           trailing: menuItems.isEmpty
-                              ? (isAdmin ? const PixelIcon(PixelIcons.shield, size: 20) : null)
+                              ? (isAdmin ? const Icon(Icons.shield, size: 20) : null)
                               : PopupMenuButton<String>(
                                   onSelected: (value) {
                                     if (value == 'promote') _promote(context, ref, m.userId);
@@ -257,7 +256,7 @@ class GroupDetailScreen extends ConsumerWidget {
                       ),
                       title: Text(captain.user?.displayName ?? captain.userId),
                       subtitle: const Text('Capitán'),
-                      trailing: const PixelIcon(PixelIcons.chatBubbleOutline, size: 20),
+                      trailing: const Icon(Icons.chat_bubble_outline, size: 20),
                       onTap: () => context.push('/groups/$groupId/message-captain'),
                     ),
                   );
@@ -429,7 +428,7 @@ class GroupDetailScreen extends ConsumerWidget {
                   ),
                   IconButton(
                     tooltip: 'Copiar código',
-                    icon: const PixelIcon(PixelIcons.copyOutlined, size: 20),
+                    icon: const Icon(Icons.copy_outlined, size: 20),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: inviteCode));
                       ScaffoldMessenger.of(sheetContext)
@@ -465,7 +464,7 @@ class GroupDetailScreen extends ConsumerWidget {
 class _ActionRibbon extends StatelessWidget {
   const _ActionRibbon({required this.icon, required this.label, required this.onTap});
 
-  final List<List<int>> icon;
+  final IconData icon;
   final String label;
   final VoidCallback onTap;
 
@@ -485,16 +484,16 @@ class _ActionRibbon extends StatelessWidget {
           ),
           child: Row(
             children: [
-              PixelIcon(icon, color: accent, size: 26),
+              Icon(icon, color: accent, size: 26),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   label,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: AppTheme.ribbonTitleStyle(context),
                 ),
               ),
-              PixelIcon(
-                PixelIcons.chevronRight,
+              Icon(
+                Icons.chevron_right,
                 size: 18,
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
               ),
@@ -509,7 +508,7 @@ class _ActionRibbon extends StatelessWidget {
 class _SquareButton extends StatelessWidget {
   const _SquareButton({required this.icon, required this.label, required this.onTap});
 
-  final List<List<int>> icon;
+  final IconData icon;
   final String label;
   final VoidCallback onTap;
 
@@ -526,7 +525,7 @@ class _SquareButton extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                PixelIcon(icon, size: 30, color: Theme.of(context).colorScheme.primary),
+                Icon(icon, size: 30, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 8),
                 Text(
                   label,
@@ -594,15 +593,15 @@ class _PlayerEloRibbonState extends State<_PlayerEloRibbon> {
             children: [
               Row(
                 children: [
-                  PixelIcon(PixelIcons.showChart, color: accent, size: 26),
+                  Icon(Icons.show_chart, color: accent, size: 26),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: Text(widget.playerLabel, style: Theme.of(context).textTheme.titleMedium),
+                    child: Text(widget.playerLabel, style: AppTheme.ribbonTitleStyle(context)),
                   ),
-                  PixelIcon(
+                  Icon(
                     widget.hasPlayer
-                        ? (_expanded ? PixelIcons.expandLess : PixelIcons.expandMore)
-                        : PixelIcons.chevronRight,
+                        ? (_expanded ? Icons.expand_less : Icons.expand_more)
+                        : Icons.chevron_right,
                     size: 18,
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                   ),
@@ -749,7 +748,7 @@ class _VenueAddressDialogState extends State<_VenueAddressDialog> {
                   itemCount: _suggestions.length,
                   itemBuilder: (context, index) => ListTile(
                     dense: true,
-                    leading: const PixelIcon(PixelIcons.locationOnOutlined, size: 18),
+                    leading: const Icon(Icons.location_on_outlined, size: 18),
                     title: Text(
                       _suggestions[index],
                       maxLines: 2,
@@ -877,13 +876,13 @@ class _VenueRibbonState extends State<_VenueRibbon> {
               ),
               child: Row(
                 children: [
-                  PixelIcon(PixelIcons.locationOnOutlined, color: accent, size: 26),
+                  Icon(Icons.location_on_outlined, color: accent, size: 26),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('CANCHA', style: Theme.of(context).textTheme.titleMedium),
+                        Text('CANCHA', style: AppTheme.ribbonTitleStyle(context)),
                         Text(
                           _hasAddress
                               ? widget.venueAddress!
@@ -900,12 +899,12 @@ class _VenueRibbonState extends State<_VenueRibbon> {
                   if (widget.isAdmin)
                     IconButton(
                       tooltip: 'Editar cancha',
-                      icon: const PixelIcon(PixelIcons.editOutlined, size: 20),
+                      icon: const Icon(Icons.edit_outlined, size: 20),
                       onPressed: widget.onEdit,
                     )
                   else if (_hasAddress)
-                    PixelIcon(
-                      _expanded ? PixelIcons.expandLess : PixelIcons.expandMore,
+                    Icon(
+                      _expanded ? Icons.expand_less : Icons.expand_more,
                       size: 18,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                     ),

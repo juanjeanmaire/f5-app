@@ -143,6 +143,19 @@ class AppTheme {
   /// Theme por defecto (azul marino) — se usa si el usuario no eligió
   /// equipo, o antes de que la sesión termine de cargar.
   static ThemeData get light => build();
+
+  /// Tipografía pixel de verdad (VT323) para los títulos de los ribbons —
+  /// un guiño más directo a la identidad pixel-art que Bebas Neue sola.
+  /// VT323 se ve más chica/fina que otras fuentes al mismo tamaño
+  /// nominal, por eso se agranda un poco para que pese similar.
+  static TextStyle ribbonTitleStyle(BuildContext context) {
+    final base = Theme.of(context).textTheme.titleMedium;
+    return GoogleFonts.vt323(
+      textStyle: base,
+      fontSize: (base?.fontSize ?? 16) * 1.3,
+      letterSpacing: 0.5,
+    );
+  }
 }
 
 /// El theme "vivo" de la app: azul marino por defecto, o el color del

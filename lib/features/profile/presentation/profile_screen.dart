@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/theme/league_teams.dart';
 import '../../../shared/widgets/async_value_widget.dart';
-import '../../../shared/widgets/pixel_icon.dart';
 import '../../auth/domain/user.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../groups/domain/group_membership.dart';
@@ -190,7 +189,7 @@ class ProfileScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Cerrar sesión',
-            icon: const PixelIcon(PixelIcons.logout, size: 20),
+            icon: const Icon(Icons.logout, size: 20),
             onPressed: () => _signOut(context, ref),
           ),
         ],
@@ -229,12 +228,12 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       OutlinedButton.icon(
                         onPressed: () => _editProfile(context, ref, user),
-                        icon: const PixelIcon(PixelIcons.editOutlined, size: 18),
+                        icon: const Icon(Icons.edit_outlined, size: 18),
                         label: const Text('Editar perfil'),
                       ),
                       OutlinedButton.icon(
                         onPressed: () => _changePassword(context, ref),
-                        icon: const PixelIcon(PixelIcons.lockOutline, size: 18),
+                        icon: const Icon(Icons.lock_outline, size: 18),
                         label: const Text('Cambiar contraseña'),
                       ),
                     ],
@@ -298,10 +297,10 @@ class ProfileScreen extends ConsumerWidget {
                   children: captainOf.map((m) {
                     return Card(
                       child: ListTile(
-                        leading: const PixelIcon(PixelIcons.mailOutline, size: 20),
+                        leading: const Icon(Icons.mail_outline, size: 20),
                         title: Text(m.group?.name ?? 'Tu grupo'),
                         subtitle: const Text('Ver mensajes de los jugadores'),
-                        trailing: const PixelIcon(PixelIcons.chevronRight, size: 18),
+                        trailing: const Icon(Icons.chevron_right, size: 18),
                         onTap: () => context.push('/groups/${m.groupId}/inbox'),
                       ),
                     );

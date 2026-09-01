@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
-import '../../../shared/widgets/pixel_icon.dart';
 import '../domain/player.dart';
 import 'players_controller.dart';
 
@@ -33,8 +32,8 @@ class PlayersListScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 120),
                     child: Column(
                       children: [
-                        PixelIcon(
-                          PixelIcons.sportsSoccer,
+                        Icon(
+                          Icons.sports_soccer,
                           size: 64,
                           color: Theme.of(context).colorScheme.outline,
                         ),
@@ -64,7 +63,7 @@ class PlayersListScreen extends ConsumerWidget {
       floatingActionButton: isAdmin
           ? FloatingActionButton.extended(
               onPressed: () => _showAddPlayerDialog(context, ref),
-              icon: const PixelIcon(PixelIcons.personAddOutlined, size: 20),
+              icon: const Icon(Icons.person_add_outlined, size: 20),
               label: const Text('Jugador'),
             )
           : null,

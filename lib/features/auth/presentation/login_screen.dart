@@ -6,7 +6,6 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/entrance_animation.dart';
 import '../../../shared/widgets/pixel_f5_logo.dart';
-import '../../../shared/widgets/pixel_icon.dart';
 import 'auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -144,10 +143,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: 'Contraseña',
                         suffixIcon: IconButton(
-                          icon: PixelIcon(
+                          icon: Icon(
                             _obscurePassword
-                                ? PixelIcons.visibilityOutlined
-                                : PixelIcons.visibilityOffOutlined,
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                             size: 20,
                           ),
                           onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
