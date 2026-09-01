@@ -23,7 +23,9 @@ class MatchHistoryScreen extends ConsumerWidget {
     final teamBName = groupAsync.valueOrNull?.displayTeamBName ?? 'B';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Partidos')),
+      appBar: AppBar(
+        title: Text('Partidos de ${groupAsync.valueOrNull?.name ?? "este grupo"}'),
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(matchesControllerProvider(groupId).notifier).refresh(),
         child: AsyncValueWidget<List<Match>>(

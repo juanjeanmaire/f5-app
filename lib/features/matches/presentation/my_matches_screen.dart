@@ -43,12 +43,23 @@ class MyMatchesScreen extends ConsumerWidget {
             }
             return ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: matches.length,
+              itemCount: matches.length + 1,
               separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, index) => _MyMatchCard(
-                match: matches[index],
-                currentUserId: currentUserId,
-              ),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      'Todos tus partidos, en todos tus grupos',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  );
+                }
+                return _MyMatchCard(
+                  match: matches[index - 1],
+                  currentUserId: currentUserId,
+                );
+              },
             );
           },
         ),
