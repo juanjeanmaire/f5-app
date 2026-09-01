@@ -1,0 +1,78 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # Cualquier APK necesita estar firmado, incluso los de debug — se
+      # cachea el keystore para que sea siempre el mismo entre builds
+      # (no es estrictamente necesario ahora que no usamos Google Sign-In,
+      # pero no cuesta nada mantenerlo estable).
+      - name: Restaurar (o preparar) el debug keystore
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: debug-keystore-v1
+
+      - name: Generar el debug keystore si todavía no existe
+        run: |
+          mkdir -p ~/.android
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore ~/.android/debug.keystore \
+              -storepass android -keypass android \
+              -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Sacar el test de ejemplo (si existe)
+        run: rm -f test/widget_test.dart
+
+      - name: Instalar dependencias
+        run: flutter pub get
+
+      - name: Generar el ícono de la app (launcher)
+        run: dart run flutter_launcher_icons
+
+      - name: Generar la pantalla de carga nativa
+        run: dart run flutter_native_splash:create
+
+      - name: Analizar (informativo, no bloquea el build)
+        run: flutter analyze || true
+
+      - name: Compilar el APK (debug, firmado con el keystore cacheado)
+        run: |
+          flutter build apk --debug \
+            --dart-define=API_BASE_URL=https://f5-backend-8inv.onrender.com
+
+      - name: Publicar el APK como Release (descarga directa)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Build ${{ github.run_number }}
+          files: build/app/outputs/flutter-apk/app-debug.apk
+          body: |
+            APK de prueba, firmado con el debug keystore compartido de CI.
+            Instalar directo en el celular desde el link de abajo.
