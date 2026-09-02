@@ -11,6 +11,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/utils/whatsapp_share.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import '../../../shared/widgets/elo_line_chart.dart';
 import '../../../shared/widgets/pixel_chat_icon.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -51,6 +52,14 @@ class GroupDetailScreen extends ConsumerWidget {
     final matchesAsync = ref.watch(matchesControllerProvider(groupId));
     final activeCallAsync = ref.watch(activeMatchCallProvider(groupId));
     final currentUser = ref.watch(authControllerProvider).valueOrNull;
+
+    void refreshAll() {
+      ref.invalidate(groupDetailProvider(groupId));
+      ref.invalidate(groupMembersProvider(groupId));
+      ref.invalidate(playersControllerProvider(groupId));
+      ref.invalidate(matchesControllerProvider(groupId));
+      ref.invalidate(activeMatchCallProvider(groupId));
+    }
 
     final title = groupAsync.valueOrNull?.name ?? initialGroup?.name ?? 'Grupo';
     final inviteCode = groupAsync.valueOrNull?.inviteCode ?? initialGroup?.inviteCode;
@@ -101,15 +110,14 @@ class GroupDetailScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(groupDetailProvider(groupId));
-          ref.invalidate(groupMembersProvider(groupId));
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (activeCallAsync.valueOrNull != null)
+      body: AutoRefresh(
+        onRefresh: refreshAll,
+        child: RefreshIndicator(
+          onRefresh: () async => refreshAll(),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (activeCallAsync.valueOrNull != null)
               _MatchCallBanner(
                 call: activeCallAsync.valueOrNull!,
                 onTap: () => context.push(
@@ -289,6 +297,7 @@ class GroupDetailScreen extends ConsumerWidget {
             ],
           ],
         ),
+      ),
       ),
     );
   }

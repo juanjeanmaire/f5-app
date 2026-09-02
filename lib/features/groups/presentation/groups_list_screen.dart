@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import '../../../shared/widgets/pixel_f5_logo.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../domain/group_membership.dart';
@@ -35,45 +36,49 @@ class GroupsListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: RefreshIndicator(
+      body: AutoRefresh(
+        interval: const Duration(seconds: 20),
         onRefresh: () => ref.read(groupsControllerProvider.notifier).refresh(),
-        child: AsyncValueWidget<List<GroupMembership>>(
-          value: groupsAsync,
-          onRetry: () => ref.read(groupsControllerProvider.notifier).refresh(),
-          data: (memberships) {
-            if (memberships.isEmpty) {
-              return ListView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 120),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.groups_outlined,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          user != null ? '¡Hola, ${user.displayName}!' : '¡Hola!',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        const Text('Todavía no sos parte de ningún grupo.'),
-                      ],
+        child: RefreshIndicator(
+          onRefresh: () => ref.read(groupsControllerProvider.notifier).refresh(),
+          child: AsyncValueWidget<List<GroupMembership>>(
+            value: groupsAsync,
+            onRetry: () => ref.read(groupsControllerProvider.notifier).refresh(),
+            data: (memberships) {
+              if (memberships.isEmpty) {
+                return ListView(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 120),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.groups_outlined,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            user != null ? '¡Hola, ${user.displayName}!' : '¡Hola!',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text('Todavía no sos parte de ningún grupo.'),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              );
-            }
+                  ],
+                );
+              }
 
-            return ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: memberships.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, index) => GroupListTile(membership: memberships[index]),
-            );
-          },
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: memberships.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) => GroupListTile(membership: memberships[index]),
+              );
+            },
+          ),
         ),
       ),
     );

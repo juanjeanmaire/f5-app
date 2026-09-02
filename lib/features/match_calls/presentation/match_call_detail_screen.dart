@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/async_value_widget.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../groups/presentation/group_detail_controller.dart';
 import '../../groups/presentation/groups_controller.dart';
@@ -42,14 +43,16 @@ class MatchCallDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Convocatoria')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(matchCallDetailProvider(_key)),
-        child: AsyncValueWidget<MatchCall>(
-          value: callAsync,
-          onRetry: () => ref.invalidate(matchCallDetailProvider(_key)),
-          data: (call) {
-            final d = call.date;
-            final dateLabel = '${d.day.toString().padLeft(2, '0')}/'
+      body: AutoRefresh(
+        onRefresh: () => ref.invalidate(matchCallDetailProvider(_key)),
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(matchCallDetailProvider(_key)),
+          child: AsyncValueWidget<MatchCall>(
+            value: callAsync,
+            onRetry: () => ref.invalidate(matchCallDetailProvider(_key)),
+            data: (call) {
+              final d = call.date;
+              final dateLabel = '${d.day.toString().padLeft(2, '0')}/'
                 '${d.month.toString().padLeft(2, '0')}/${d.year} · '
                 '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
             final myGoing = call.myResponse(currentUserId);
@@ -160,6 +163,7 @@ class MatchCallDetailScreen extends ConsumerWidget {
             );
           },
         ),
+      ),
       ),
     );
   }
