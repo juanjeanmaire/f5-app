@@ -1,0 +1,57 @@
+name: Build Release AAB (Play Store)
+
+# Se dispara a mano, cuando quieras subir una versión nueva a Play Store
+# — a diferencia de "Build APK" (para probar con amigos), este no corre
+# solo en cada commit.
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Sacar el test de ejemplo (si existe)
+        run: rm -f test/widget_test.dart
+
+      - name: Instalar dependencias
+        run: flutter pub get
+
+      - name: Generar el ícono de la app (launcher)
+        run: dart run flutter_launcher_icons
+
+      - name: Generar la pantalla de carga nativa
+        run: dart run flutter_native_splash:create
+
+      - name: Restaurar la clave de firma real desde el secret
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
+
+      - name: Compilar el Android App Bundle (.aab) firmado
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/android/app/upload-keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          flutter build appbundle --release \
+            --dart-define=API_BASE_URL=https://f5-backend-8inv.onrender.com
+
+      - name: Subir el .aab como archivo descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: f5-app-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
