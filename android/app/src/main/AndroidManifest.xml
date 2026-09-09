@@ -1,4 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Necesario para que la app pueda conectarse a internet en builds
+         de RELEASE — Flutter lo agrega solo en builds de debug (para el
+         hot reload y las devtools), pero en release hay que declararlo a
+         mano. Sin esto, cualquier request falla con "Failed host lookup"
+         como si no hubiera conexión, aunque la haya. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:label="f5_app"
         android:name="${applicationName}"
