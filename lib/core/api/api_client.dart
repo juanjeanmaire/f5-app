@@ -18,8 +18,12 @@ final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: AppConfig.apiBaseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      // El backend vive en el plan gratis de Render, que apaga el
+      // servidor tras un rato sin uso — el primer pedido después de eso
+      // puede tardar 20-30s en "despertarlo". Con 10s se cortaba antes
+      // de que terminara de arrancar.
+      connectTimeout: const Duration(seconds: 45),
+      receiveTimeout: const Duration(seconds: 45),
       contentType: 'application/json',
     ),
   );

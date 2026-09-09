@@ -29,8 +29,14 @@ class ApiException implements Exception {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.connectionError) {
+      // DIAGNÓSTICO TEMPORAL — sacar esta línea una vez que encontremos
+      // la causa real (ver conversación). Muestra el tipo exacto de
+      // error de Dio y la URL a la que intentó conectarse, en vez del
+      // mensaje genérico de siempre.
       return ApiException(
-        message: 'No se pudo conectar con el servidor. Revisá tu conexión.',
+        message: 'No se pudo conectar con el servidor.\n'
+            '[diag] tipo: ${e.type.name} · url: ${e.requestOptions.uri} · '
+            'detalle: ${e.message}',
       );
     }
 
