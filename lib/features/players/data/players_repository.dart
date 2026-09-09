@@ -20,13 +20,25 @@ class PlayersRepository {
   }
 
   Future<List<Player>> listPlayers(String groupId) async {
+    late final Response response;
     try {
-      final response = await _dio.get('/groups/$groupId/players');
+      response = await _dio.get('/groups/$groupId/players');
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+
+    try {
       return (response.data as List)
           .map((e) => Player.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw ApiException.fromDioError(e);
+    } catch (e) {
+      // DIAGNÓSTICO TEMPORAL — sacar una vez que encontremos la causa
+      // real. Esto separa "falló el pedido al servidor" (arriba) de
+      // "el servidor contestó pero no pudimos interpretar la respuesta"
+      // (acá) — y muestra el motivo exacto en vez del mensaje genérico.
+      throw ApiException(
+        message: 'No se pudo interpretar la lista de jugadores.\n[diag] $e',
+      );
     }
   }
 
